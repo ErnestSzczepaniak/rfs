@@ -6,13 +6,16 @@ TEST_CASE("asd")
 {
     _init();
 
-    unsigned int tab = 0x12345678;
+    unsigned char sample[] = {0x11, 0x22, 0x33};
+    unsigned char rx[3];
 
-    for (int i = 0; i < 20; i++)
-    {
-        driver.write(i * 4, 4, &tab); 
-    }
+    Sector s(0, &driver);
+
+    s.write(2, 3, sample);
+    s.read(2, 3, rx);
+
     
-    driver.erase(0x40);
-    
+    sector.from(table).to(0x10).write(10);
+    sector.from(0x0).to(table).read(20);
+
 }
