@@ -3,9 +3,6 @@
 
 std::fstream stream;
 
-static constexpr auto _sector_size = 64;
-static constexpr auto _sector_number = 2;
-
 bool _init()
 {
     stream.open("/home/en2/Documents/programs/rfs/flash", std::ios::out | std::ios::in);
@@ -64,4 +61,4 @@ bool _erase(unsigned int address)
     }
 }
 
-Flash_driver driver = {_read, _write, _erase, _sector_size, _sector_size * _sector_number};
+Flash_driver driver = {_read, _write, _erase};

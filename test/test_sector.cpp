@@ -6,16 +6,14 @@ TEST_CASE("asd")
 {
     _init();
 
-    unsigned char sample[] = {0x11, 0x22, 0x33};
-    unsigned char rx[3];
+    unsigned int as = 0x12345678;
 
-    Sector s(0, &driver);
+    Sector s(1, &driver);
 
-    s.write(2, 3, sample);
-    s.read(2, 3, rx);
-
+    for (int i = 0; i < 16; i++)
+    {
+        s.write(as);
+    }
     
-    sector.from(table).to(0x10).write(10);
-    sector.from(0x0).to(table).read(20);
-
+    s.cell(10).clear(8, true);
 }

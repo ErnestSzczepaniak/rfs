@@ -1,10 +1,12 @@
 #include "sector.h"
 #include "string.h"
+#include <stdint.h>
 
 Sector::Sector(int number, Flash_driver * driver)
 :
-_address(number * driver->size_sector),
-_driver(driver)
+_number(number),
+_driver(driver),
+_cell(0)
 {
 
 }
@@ -14,34 +16,79 @@ Sector::~Sector()
 
 }
 
-bool Sector::errase()
+Sector & Sector::number(int number)
 {
-    return _driver->erase(_address);
+    _number = number;
+
+    return *this;
 }
 
-bool Sector::read(int offset, int size, unsigned char * to)
+int Sector::number()
 {
-    auto offset_reminder = offset % 4;
-    auto size_reminder = offset_reminder + 4 - (size + offset_reminder) % 4;
-
-    unsigned int buffer[size_buffer];
-    auto * ptr = (unsigned char *)buffer;
-
-    _driver->read(offset - offset_reminder, size + size_reminder, buffer);
-
-    memcpy(to, ptr + offset_reminder, size);
+    return _number;
 }
 
-bool Sector::write(int offset, int size, unsigned char * from)
+Sector & Sector::cell(int value)
 {
-    auto offset_reminder = offset % 4;
-    auto size_reminder = offset_reminder + 4 - (size + offset_reminder) % 4;
+    _cell = value;
 
-    unsigned int buffer[size_buffer];
-    auto * ptr = (unsigned char *)buffer;
-
-    memcpy(ptr + offset_reminder, from, size);
-
-    return _driver->write(offset - offset_reminder, size + size_reminder, buffer);
+    return *this;
 }
 
+int Sector::cell()
+{
+    return _cell;
+}
+
+bool Sector::erase()
+{
+    return  _driver->erase(_number * _driver->size_sector);
+}
+
+bool Sector::clear(int records, bool verify)
+{
+    auto to_clear = (_cell + records >= _driver->size_sector / size_base) ? (_driver->size_sector / size_base) - _cell : records;
+    auto stored = _cell;
+    unsigned int buffer_tx[_driver->size_sector / size_base];
+
+    if (cell(0).read(buffer_tx) == false) return false;
+
+    memset(&buffer_tx[stored], 0xff, to_clear * size_base);
+
+    if (erase() == false) return false;
+
+    if (cell(0).write(buffer_tx) == false) return false;
+
+    if (verify)
+    {
+        unsigned int buffer_rx[_driver->size_sector / size_base];
+
+        if (cell(0).read(buffer_rx) == false) return false;
+
+        for (int i = 0; i < _driver->size_sector / size_base; i++)
+        {
+            if (buffer_tx[i] != buffer_rx[i]) return false;
+        }   
+    }
+
+
+    _cell = stored + to_clear;
+
+    return true;
+}
+
+/* ---------------------------------------------| info |--------------------------------------------- */
+
+unsigned int Sector::_crc_calculate(unsigned int * data, int size)
+{
+    unsigned int crc = 0;
+    unsigned char * ptr = (unsigned char *) data;
+
+	for (int i = 0; i < size; i++)
+	{
+		auto pos = (crc ^ (ptr[i] << 24)) >> 24;
+		crc = (crc << 8) ^ (crc_table[pos]);
+	}
+
+	return crc;
+}
