@@ -1,19 +1,19 @@
 #include "test.h"
-#include "sector.h"
+#include "flash_sector.h"
 #include "flash_driver_software.h"
 
 TEST_CASE("asd")
 {
     _init();
 
-    unsigned int as = 0x12345678;
+    unsigned int as[2] = {0x12345678, 0};
+    char key = 0x55;
 
-    Sector s(1, &driver);
+    Flash_sector s(0, &driver);
 
-    for (int i = 0; i < 16; i++)
-    {
-        s.write(as);
-    }
-    
-    s.cell(10).clear(8, true);
+    s.reset();
+
+    auto bytest = s.at(0).write_from(as);
+    auto wqe = s.at(3).replace_with(key);
+
 }

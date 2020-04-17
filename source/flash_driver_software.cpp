@@ -3,6 +3,9 @@
 
 std::fstream stream;
 
+static constexpr auto _size_sector = 64;
+static constexpr auto _size_total = 128;
+
 bool _init()
 {
     stream.open("/home/en2/Documents/programs/rfs/flash", std::ios::out | std::ios::in);
@@ -15,7 +18,7 @@ bool _init()
 
     char value = 0xff;
 
-    for (int i = 0; i < driver.size_total; i++)
+    for (int i = 0; i < _size_total; i++)
     {
         stream.write((char *) &value, 1);
     }
@@ -25,40 +28,34 @@ bool _init()
 
 /* ---------------------------------------------| driver |--------------------------------------------- */
 
-bool _read(unsigned int address, int size, unsigned int * buffer)
+bool _read(int address, int size, char * buffer)
 {
-    if (address & 0x3) return false;
-    if (size & 0x3) return false;
-    if (((uintptr_t) buffer) & 0x3) return false;
-
     stream.seekg(address, std::ios::beg);
     stream.read((char *) buffer, size);
 
     return true;
 }
 
-bool _write(unsigned int address, int size, unsigned int * buffer)
+bool _write(int address, int size, char * buffer)
 {
-    if (address & 0x3) return false;
-    if (size & 0x3) return false;
-    if (((uintptr_t) buffer) & 0x3) return false;
-
     stream.seekp(address, std::ios::beg);
     stream.write((char *) buffer, size);
 
     return true;
 }
 
-bool _erase(unsigned int address)
+bool _erase(int address)
 {
-    auto offset = (address / driver.size_sector) * driver.size_sector;
+    auto offset = (address / _size_sector) * _size_sector;
 
-    unsigned int value = 0xffffffff;
+    char value = 0xff;
 
-    for (int i = 0; i < driver.size_sector / 4; i++)
+    for (int i = 0; i < _size_sector; i++)
     {
-        _write(i * 4 + offset, 4, &value);
+        _write(i + offset, 1, &value);
     }
+
+    return true;
 }
 
 Flash_driver driver = {_read, _write, _erase};

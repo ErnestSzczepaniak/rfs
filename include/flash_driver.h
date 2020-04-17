@@ -11,11 +11,9 @@
 
 struct Flash_driver
 {
-    bool (*read)(unsigned int, int, unsigned int *);
-    bool (*write)(unsigned int, int, unsigned int *);
-    bool (*erase)(unsigned int);
-    static constexpr auto size_sector = 64;
-    static constexpr auto size_total = size_sector * 4;
+    bool (*read)(int, int, char *);
+    bool (*write)(int, int, char *);
+    bool (*erase)(int);
 }; /* structure: Flash_driver */
 
 #endif /* define: flash_driver_h */
