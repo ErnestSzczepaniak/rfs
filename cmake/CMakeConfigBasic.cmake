@@ -18,7 +18,7 @@ set(name_library                rfs)
 
 set(name_executable             executable.elf)
 
-set(dependency_internal_common  )
+set(dependency_internal_common  result)
 set(dependency_internal_target  )
 set(dependency_internal_host    )
 

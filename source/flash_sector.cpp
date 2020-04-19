@@ -45,17 +45,17 @@ bool Flash_sector::reset()
 
 int Flash_sector::clear(int value)
 {
-    if (size < 1) return -1;
+    // if (size < 1) return -1;
 
-    char buffer[size];
-    auto stored = _at;
+    // char buffer[size];
+    // auto stored = _at;
 
-    if (at(0).read_to(buffer) != size) return -1;
-    if (reset() == false) return -1;
+    // if (at(0).read_to(buffer) != size) return -1;
+    // if (reset() == false) return -1;
 
-    auto space = (stored + size >= size) ? size - stored : size;
+    // auto space = (stored + size >= size) ? size - stored : size;
 
-    memset(&buffer[stored], 0xff, space);
+    // memset(&buffer[stored], 0xff, space);
 
-    return at(0).write_from(buffer) == size ? space : -1;
+    // return at(0).write_from(buffer) == size ? space : -1;
 }

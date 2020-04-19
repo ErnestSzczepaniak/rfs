@@ -11,6 +11,8 @@
 
 #include "flash_driver.h"
 #include "string.h"
+#include "result.h"
+
 
 class Flash_sector
 {
@@ -35,10 +37,11 @@ public:
     bool reset();
     int clear(int value);
 
-    template<typename T> int read_to(T & value);
-    template<typename T> int write_from(T & value);
-    template<typename T> int verify_with(T & value);
-    template<typename T> int replace_with(T & value);
+    template<typename T> write(T & value);
+    template<typename T> bool replace_with(T & value);
+
+    template<typename T> Result<bool> verify_with(T & value);
+    template<typename T> Result<T> read();
 
 protected:
     template<typename T> int _space(T & payload);
@@ -51,15 +54,17 @@ private:
 }; /* class: Flash_sector */
 
 template<typename T>
-int Flash_sector::read_to(T & value)
+Result<T> Flash_sector::read()
 {
-    auto space = _space(value);
+    Result<T> result;
 
-    if (_driver->read(_number * size + _at, space, (char *)&value) == false) return -1;
+    auto space = _space(result.value);
+
+    if (_driver->read(_number * size + _at, space, (char *)&result.value) == false) return "Driver error ...";
  
     _at += space;
 
-    return space;
+    return result;
 }
 
 template<typename T>

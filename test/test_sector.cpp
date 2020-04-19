@@ -16,4 +16,6 @@ TEST_CASE("asd")
     auto bytest = s.at(0).write_from(as);
     auto wqe = s.at(3).replace_with(key);
 
+    auto [result, word] = s.at(0).read<int>();
+
 }
