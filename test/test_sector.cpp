@@ -15,10 +15,7 @@ TEST_CASE("asd")
 
     s.reset();
 
-    auto [status, result] = s.at(0).read<unsigned int>();
 
-    auto w = s.at(0).verify_with(as);
-
-    auto z = s.at(0).replace_with(as);
+    auto [status, success] = s.at(0).verify_with(as);
 
 }

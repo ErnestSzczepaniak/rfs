@@ -40,7 +40,7 @@ int Flash_sector::at()
 
 Status Flash_sector::reset()
 {
-    return _driver->erase(_number * size);
+    return _driver->erase(_number * size_sector);
 }
 
 Status Flash_sector::clear(int value)
@@ -58,4 +58,5 @@ Status Flash_sector::clear(int value)
     // memset(&buffer[stored], 0xff, space);
 
     // return at(0).write_from(buffer) == size ? space : -1;
+    return true;
 }
