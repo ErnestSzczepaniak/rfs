@@ -38,12 +38,12 @@ int Flash_sector::at()
     return _at;
 }
 
-bool Flash_sector::reset()
+Status Flash_sector::reset()
 {
     return _driver->erase(_number * size);
 }
 
-int Flash_sector::clear(int value)
+Status Flash_sector::clear(int value)
 {
     // if (size < 1) return -1;
 

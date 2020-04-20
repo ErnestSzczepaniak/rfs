@@ -17,7 +17,7 @@ set(private_definition_host     )
 
 # ---------------------------------------------| option |--------------------------------------------- #
 
-set(public_option_common        -std=c++11)
+set(public_option_common        -std=c++2a)
 set(public_option_target        )
 set(public_option_host          )
 

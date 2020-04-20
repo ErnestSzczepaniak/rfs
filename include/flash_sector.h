@@ -13,7 +13,6 @@
 #include "string.h"
 #include "result.h"
 
-
 class Flash_sector
 {
     /**
@@ -22,7 +21,8 @@ class Flash_sector
      * @details	
     **/
 
-   static constexpr auto size = 64;
+    static constexpr auto size = 64;
+    struct Sector{unsigned char payload[64];};
 
 public:
     Flash_sector(int number, Flash_driver * driver);
@@ -34,11 +34,11 @@ public:
     Flash_sector & at(int value);
     int at();
 
-    bool reset();
-    int clear(int value);
+    Status reset();
+    Status clear(int value);
 
-    template<typename T> write(T & value);
-    template<typename T> bool replace_with(T & value);
+    template<typename T> Status write(T & value);
+    template<typename T> Status replace_with(T & value);
 
     template<typename T> Result<bool> verify_with(T & value);
     template<typename T> Result<T> read();
@@ -58,61 +58,71 @@ Result<T> Flash_sector::read()
 {
     Result<T> result;
 
-    auto space = _space(result.value);
+    if (_at + sizeof(T) > size) return Argument::Out_of_range();
 
-    if (_driver->read(_number * size + _at, space, (char *)&result.value) == false) return "Driver error ...";
+    if (_driver->read(_number * size + _at, sizeof(T), (char *)&result.value) == false) return Driver::Read_error();
  
-    _at += space;
+    _at += sizeof(T);
 
     return result;
 }
 
 template<typename T>
-int Flash_sector::write_from(T & value)
+Status Flash_sector::write(T & value)
 {
-    auto space = _space(value);
+    if (_at + sizeof(T) > size) return Argument::Out_of_range();
 
-    if (_driver->write(_number * size + _at, space, (char *)&value) == false) return -1;
+    if (_driver->write(_number * size + _at, sizeof(T), (char *)&value) == false) Driver::Write_error();
  
-    _at += space;
+    _at += sizeof(T);
 
-    return space;
+    return true;
 }
 
 template<typename T>
-int Flash_sector::verify_with(T & value)
+Result<bool> Flash_sector::verify_with(T & value)
 {
-    if (_space(value) < sizeof(T)) return -1;
+    Result<bool> result;
 
-    T buffer;
+    if (_at + sizeof(T) > size) return Argument::Out_of_range();
 
-    if (read_to(buffer) != sizeof(T)) return -1;
+    auto [status, buffer] = read<T>();
+
+    if (status == false) return status;
 
     auto * ptr1 = (char *)&value;
     auto * ptr2 = (char *)&buffer;
 
+    result.value = true;
+
     for (int i = 0; i < sizeof(T); i++)
     {
-        if (ptr1[i] != ptr2[i]) return i;
+        if (ptr1[i] != ptr2[i])
+        {
+            result.value = false;
+            break;
+        }
     }
-    
-    return 0;
+
+    return result;
 }
 
 template<typename T>
-int Flash_sector::replace_with(T & value)
+Status Flash_sector::replace_with(T & value)
 {
-    auto space = _space(value);
+    if (_at + sizeof(T) > size) return Argument::Out_of_range();
 
-    char buffer[size];
     auto stored = _at;
 
-    if (at(0).read_to(buffer) != size) return -1;
-    if (reset() == false) return -1;
+    auto [status_read, sector] = read<Sector>();
 
-    memcpy(&buffer[stored], &value, space);
+    if (status_read == false) return status_read;
+
+    if (auto status_reset = reset(); status_reset == false) return status_reset;
+
+    memcpy(&sector.payload[stored], &value, sizeof(T));
     
-    return at(0).write_from(buffer) == size ? space : -1;
+    return at(0).write(sector);
 }
 
 /* ---------------------------------------------| info |--------------------------------------------- */
