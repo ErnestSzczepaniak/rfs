@@ -9,18 +9,15 @@
  * @details	
 **/
 
-#include "flash_driver.h"
+#include "rfs.h"
 #include "result.h"
+#include "string.h"
+
 
 class Flash_sector
 {
-    static constexpr auto size_sector = 64;
-    struct Sector{unsigned char payload[64];};
-
-    static_assert(sizeof(Sector) == size_sector);
-
 public:
-    Flash_sector(int number, Flash_driver * driver);
+    Flash_sector(int number, Rfs_driver * driver);
     ~Flash_sector();
 
     Flash_sector & number(int value);
@@ -32,26 +29,31 @@ public:
     Status reset();
     Status clear(int value);
 
-    template<typename T> Status write(T & value);
-    template<typename T> Status replace_with(T & value);
+    Result<Sector> read();
+    Status write(Sector & sector);
 
-    template<typename T> Result<bool> verify_with(T & value);
-    template<typename T> Result<T> read();
+    Result<bool> verify_with(Flash_sector & other);
+    Status replace_with(Flash_sector & other);
+
+    template<typename T> Result<T> read_value();
+    template<typename T> Status write_value(T & value);
+    template<typename T> Result<bool> verify_with_value(T & value);
+    template<typename T> Status replace_with_value(T & value);
 
 private:
-    Flash_driver * _driver;
+    Rfs_driver * _driver;
 
     int _number;
     int _at;
 }; /* class: Flash_sector */
 
 template<typename T>
-Result<T> Flash_sector::read()
+Result<T> Flash_sector::read_value()
 {
     Result<T> result;
 
-    if (_at + sizeof(T) > size_sector) return status::argument::Out_of_range();
-    if (_driver->read(_number * size_sector + _at, sizeof(T), (char *)&result.value) == false) return status::driver::Read_error();
+    if (_at + sizeof(T) > size_sector) return error::argument::Size_mismatch();
+    if (_driver->read(_number * size_sector + _at, sizeof(T), (char *)&result.value) == false) return error::driver::Read();
  
     _at += sizeof(T);
 
@@ -59,10 +61,10 @@ Result<T> Flash_sector::read()
 }
 
 template<typename T>
-Status Flash_sector::write(T & value)
+Status Flash_sector::write_value(T & value)
 {
-    if (_at + sizeof(T) > size_sector) return status::argument::Out_of_range();
-    if (_driver->write(_number * size_sector + _at, sizeof(T), (char *)&value) == false) return status::driver::Write_error();
+    if (_at + sizeof(T) > size_sector) return error::argument::Size_mismatch();
+    if (_driver->write(_number * size_sector + _at, sizeof(T), (char *)&value) == false) return error::driver::Write();
  
     _at += sizeof(T);
 
@@ -70,48 +72,36 @@ Status Flash_sector::write(T & value)
 }
 
 template<typename T>
-Result<bool> Flash_sector::verify_with(T & value)
+Result<bool> Flash_sector::verify_with_value(T & value)
 {
     Result<bool> result;
 
-    if (_at + sizeof(T) > size_sector) return status::argument::Out_of_range();
+    if (_at + sizeof(T) > size_sector) return error::argument::Size_mismatch();
 
-    auto [status, buffer] = read<T>();
+    auto [status_read, buffer] = read_value<T>();
 
-    if (status == false) return status;
+    if (status_read == false) return status_read;
 
     auto * ptr1 = (char *)&value;
     auto * ptr2 = (char *)&buffer;
 
-    result.value = true;
-
-    for (int i = 0; i < sizeof(T); i++)
-    {
-        if (ptr1[i] != ptr2[i])
-        {
-            result.value = false;
-            break;
-        }
-    }
+    result.value = memcmp(&value, &buffer, sizeof(T)) == 0 ? true : false;
 
     return result;
 }
 
 template<typename T>
-Status Flash_sector::replace_with(T & value)
+Status Flash_sector::replace_with_value(T & value)
 {
-    if (_at + sizeof(T) > size_sector) return status::argument::Out_of_range();
-
     Sector sector;
-    if (_driver->write(_number * size_sector, sizeof(Sector), (char *)&sector.payload[0]) == false) return status::driver::Write_error();
- 
+
+    if (_at + sizeof(T) > size_sector) return error::argument::Size_mismatch();
+    if (_driver->read(_number * size_sector, size_sector, (char *)&sector.payload[0]) == false) return error::driver::Read();
     if (auto status_reset = reset(); status_reset == false) return status_reset;
 
     memcpy(&sector.payload[_at], &value, sizeof(T));
 
-    return at(0).write(sector);
-
-    return true;
+    return at(0).write_value(sector);
 }
 
 #endif /* define: flash_Flash_sector_h */

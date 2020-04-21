@@ -9,9 +9,9 @@
  * @details	
 **/
 
-#include "flash_driver.h"
+#include "rfs.h"
 
-extern Flash_driver driver;
+extern Rfs_driver driver;
 
 /* ---------------------------------------------| info |--------------------------------------------- */
 

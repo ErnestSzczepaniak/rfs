@@ -2,20 +2,21 @@
 #include "flash_sector.h"
 #include "flash_driver_software.h"
 
-
-
 TEST_CASE("asd")
 {
-    _init();
+    // _init();
 
-    unsigned int as = 0xffffffff;
-    char key = 0x55;
+    // unsigned int as = 0xffffffff;
+    // char key = 0x55;
 
-    Flash_sector s(0, &driver);
+    // Flash_sector s0(0, &driver);
+    // Flash_sector s1(1, &driver);
 
-    s.reset();
 
+    // s0.reset();
+    // s1.reset();
 
-    auto [status, success] = s.at(0).verify_with(as);
+    // s0.at(4).write_value(key);
+    // auto s = s1.replace_with(s0);
 
 }

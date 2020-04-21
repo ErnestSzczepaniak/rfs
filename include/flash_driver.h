@@ -9,11 +9,6 @@
  * @details	
 **/
 
-struct Flash_driver
-{
-    bool (*read)(int, int, char *);
-    bool (*write)(int, int, char *);
-    bool (*erase)(int);
-}; /* structure: Flash_driver */
+
 
 #endif /* define: flash_driver_h */

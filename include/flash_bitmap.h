@@ -13,23 +13,25 @@
 
 class Flash_bitmap
 {
-    /**
-     * @class	Flash_bitmap
-     * @brief	
-     * @details	
-    **/
 public:
-    Flash_bitmap(int address, int width, Flash_sector * sector);
+    Flash_bitmap(int address, Flash_sector & sector);
     ~Flash_bitmap();
 
-    bool reset();
+    Flash_bitmap & address(int value);
+    int address();
 
-    bool set(int bit);
-    bool get(int bit);
+    Flash_bitmap & sector(Flash_sector & value);
+    Flash_sector & sector();
+
+    Status reset();
+
+    Status clear(int bit);
+    Result<bool> is_cleared(int bit);
+    Result<int> count_cleared();
 
 private:
+    Flash_sector & _sector;
     int _address;
-    int _width;
 
 }; /* class: Flash_bitmap */
 

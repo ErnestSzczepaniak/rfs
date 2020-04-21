@@ -3,9 +3,6 @@
 
 std::fstream stream;
 
-static constexpr auto _size_sector = 64;
-static constexpr auto _size_total = 128;
-
 bool _init()
 {
     stream.open("/home/en2/Documents/programs/rfs/flash", std::ios::out | std::ios::in);
@@ -18,7 +15,7 @@ bool _init()
 
     char value = 0xff;
 
-    for (int i = 0; i < _size_total; i++)
+    for (int i = 0; i < size_flash; i++)
     {
         stream.write((char *) &value, 1);
     }
@@ -46,11 +43,11 @@ bool _write(int address, int size, char * buffer)
 
 bool _erase(int address)
 {
-    auto offset = (address / _size_sector) * _size_sector;
+    auto offset = (address / size_sector) * size_sector;
 
     char value = 0xff;
 
-    for (int i = 0; i < _size_sector; i++)
+    for (int i = 0; i < size_sector; i++)
     {
         _write(i + offset, 1, &value);
     }
@@ -58,4 +55,4 @@ bool _erase(int address)
     return true;
 }
 
-Flash_driver driver = {_read, _write, _erase};
+Rfs_driver driver = {_read, _write, _erase};

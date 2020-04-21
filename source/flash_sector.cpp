@@ -1,6 +1,6 @@
 #include "flash_sector.h"
 
-Flash_sector::Flash_sector(int number, Flash_driver * driver)
+Flash_sector::Flash_sector(int number, Rfs_driver * driver)
 :
 _number(number),
 _driver(driver),
@@ -45,18 +45,40 @@ Status Flash_sector::reset()
 
 Status Flash_sector::clear(int value)
 {
-    // if (size < 1) return -1;
+    Sector sector;
 
-    // char buffer[size];
-    // auto stored = _at;
+    if (value < 1) return error::argument::Out_of_range();
+    if (_at + value > size_sector) return error::argument::Out_of_range();
+    if (_driver->read(_number * size_sector, size_sector, (char *)&sector.payload[0]) == false) return error::driver::Read();
+    if (auto status_reset = reset(); status_reset == false) return status_reset;
 
-    // if (at(0).read_to(buffer) != size) return -1;
-    // if (reset() == false) return -1;
+    memset(&sector.payload[_at], 0xff, value);
 
-    // auto space = (stored + size >= size) ? size - stored : size;
+    return write(sector);
+}
 
-    // memset(&buffer[stored], 0xff, space);
+Result<Sector> Flash_sector::read()
+{
+    return at(0).read_value<Sector>();
+}
 
-    // return at(0).write_from(buffer) == size ? space : -1;
-    return true;
+Status Flash_sector::write(Sector & sector)
+{
+    return at(0).write_value(sector);
+}
+
+Result<bool> Flash_sector::verify_with(Flash_sector & other)
+{
+    auto [status_other, sector_other] = other.read();
+    if (status_other == false) return status_other;
+
+    return at(0).verify_with_value(sector_other);
+}
+
+Status Flash_sector::replace_with(Flash_sector & other)
+{
+    auto [status_other, sector_other] = other.read();
+    if (status_other == false) return status_other;
+
+    return at(0).replace_with_value(sector_other); 
 }
