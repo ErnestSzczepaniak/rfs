@@ -29,6 +29,7 @@ bool _read(int address, int size, char * buffer)
 {
     stream.seekg(address, std::ios::beg);
     stream.read((char *) buffer, size);
+    stream.flush();
 
     return true;
 }
@@ -37,22 +38,21 @@ bool _write(int address, int size, char * buffer)
 {
     stream.seekp(address, std::ios::beg);
     stream.write((char *) buffer, size);
+    stream.flush();
 
     return true;
 }
 
-bool _erase(int address)
+bool _clear(int address, int range)
 {
-    auto offset = (address / size_sector) * size_sector;
-
     char value = 0xff;
 
-    for (int i = 0; i < size_sector; i++)
+    for (int i = 0; i < range; i++)
     {
-        _write(i + offset, 1, &value);
+        _write(address + i, 1, &value);
     }
 
     return true;
 }
 
-Rfs_driver driver = {_read, _write, _erase};
+Rfs_driver driver = {_read, _write, _clear};

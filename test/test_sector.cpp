@@ -9,14 +9,13 @@ TEST_CASE("asd")
     // unsigned int as = 0xffffffff;
     // char key = 0x55;
 
-    // Flash_sector s0(0, &driver);
-    // Flash_sector s1(1, &driver);
+    // Flash_sector s;
+    // s.bind(0, &driver);
+
+    // s.clear();
+
+    // auto [status, success] = s.write_back(0, key);
 
 
-    // s0.reset();
-    // s1.reset();
-
-    // s0.at(4).write_value(key);
-    // auto s = s1.replace_with(s0);
 
 }

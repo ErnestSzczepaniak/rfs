@@ -4,34 +4,29 @@
 /**
  * @file	flash_bitmap.h
  * @author	en2
- * @date	17-04-2020
+ * @date	22-04-2020
  * @brief	
  * @details	
 **/
 
-#include "flash_sector.h"
+#include "rfs.h"
 
 class Flash_bitmap
 {
 public:
-    Flash_bitmap(int address, Flash_sector & sector);
+    Flash_bitmap();
     ~Flash_bitmap();
 
-    Flash_bitmap & address(int value);
-    int address();
+    bool is_empty();
+    bool is_full();
 
-    Flash_bitmap & sector(Flash_sector & value);
-    Flash_sector & sector();
+    int allocate();
 
-    Status reset();
-
-    Status clear(int bit);
-    Result<bool> is_cleared(int bit);
-    Result<int> count_cleared();
+    unsigned char _bitmap[size_bitmap];
+    int _busy();
+protected:
 
 private:
-    Flash_sector & _sector;
-    int _address;
 
 }; /* class: Flash_bitmap */
 
