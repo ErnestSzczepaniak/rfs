@@ -1,24 +1,42 @@
 #include "flash_sector.h"
 
-Flash_sector::Flash_sector()
+Flash_sector & Flash_sector::number(int value)
 {
+    _number = value;
 
+    return *this;
 }
 
-Flash_sector::~Flash_sector()
+int Flash_sector::number()
 {
-
+    return _number;
 }
 
-Flash_sector & Flash_sector::bind(int number, Rfs_driver * driver)
+Flash_sector & Flash_sector::driver(Rfs_driver * driver)
 {
-    _number = number;
     _driver = driver;
 
     return *this;
 }
 
-Status Flash_sector::clear(int address, int range)
+Rfs_driver * Flash_sector::driver()
+{   
+    return _driver;
+}
+
+Flash_sector & Flash_sector::at(int value)
 {
-    return _driver->clear(address, range);
+    _at = value;
+
+    return *this;
+}
+
+int Flash_sector::at()
+{
+    return _at;
+}
+
+Status Flash_sector::clear(int range)
+{
+    return _driver->clear(_at, range);
 }

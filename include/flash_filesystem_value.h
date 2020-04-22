@@ -10,38 +10,19 @@
 **/
 
 #include "flash_crc_value.h"
-#include "flash_bitmap.h"
+#include "bitmap.h"
 
 template<typename T>
 class Flash_filesystem_value
 {
+    using Flash_bitmap = Bitmap<number_bits>;
+
 public:
-    Flash_filesystem_value();
-    ~Flash_filesystem_value();
+    T & get();
+    Flash_filesystem_value<T> & set(T value);
 
-    T & value();
-    Status restore(int address, Flash_sector & sector);
-    Status update(int address, Flash_sector & sector, T value);
-
-protected:
-    // Status _bitmap_update(int address, Flash_sector & sector, int bit)
-    // {
-    //     if (bit > number_bits || bit < 0) return error::argument::Out_of_range();
-    //     else if (bit < number_bits)
-    //     {
-    //         auto offset = bit / 8;
-    //         unsigned char mask = (0x80 >> (bit % 8));
-
-    //         //_bitmap.value().byte[offset] &= ~mask;
-    //     }
-    //     else
-    //     {
-    //         memset(&_bitmap.value(), 0xff, size_bitmap);
-    //         //_bitmap.value().byte[0] &= ~0x80;
-    //     }
-
-    //     return _bitmap.update(address, sector, _bitmap.value());
-    // }
+    Status load_from(Flash_sector & sector);
+    Status store_to(Flash_sector & sector);
 
 private:
     Flash_value<Flash_bitmap> _bitmap;
@@ -50,62 +31,42 @@ private:
 }; /* class: Flash_filesystem_value */
 
 template<typename T>
-Flash_filesystem_value<T>::Flash_filesystem_value()
+T & Flash_filesystem_value<T>::get()
 {
-
+    return _value.get();
 }
 
 template<typename T>
-Flash_filesystem_value<T>::~Flash_filesystem_value()
+Flash_filesystem_value<T> & Flash_filesystem_value<T>::set(T value)
 {
+    _value.set(value);
 
+    return *this;
 }
 
 template<typename T>
-Status Flash_filesystem_value<T>::restore(int address, Flash_sector & sector)
+Status Flash_filesystem_value<T>::load_from(Flash_sector & sector)
 {
-    // if (auto status_bitmap = _bitmap.restore(address, sector); status_bitmap == false) return status_bitmap;
+    if (auto result_bitmap = _bitmap.load_from(sector); result_bitmap == false) return result_bitmap;
+    if (_bitmap.get().is_full_of(true) == true) return true;
 
-    // if (_bitmap.value().is_empty() == true) return true;
+    auto offset = (_bitmap.get().count(false) - 1) * sizeof(Flash_crc_value<T>);
 
-    // auto offset = (_bitmap.value().busy() - 1) * (sizeof(Flash_crc_value<T>));
+    if (auto result_value = _value.load_from(sector.at(sector.at() + offset)); result_value == false) return result_value;
 
-    // return _value.restore(address + offset, sector);
+    return true;
 }
 
 template<typename T>
-T & Flash_filesystem_value<T>::value()
+Status Flash_filesystem_value<T>::store_to(Flash_sector & sector)
 {
-    //return _value.value();
-}
+    if (auto index = _bitmap.get().allocate(false); index == number_bits) _bitmap.get().reset(false);
 
-template<typename T>
-Status Flash_filesystem_value<T>::update(int address, Flash_sector & sector, T value)
-{
-    // if (auto status_bitmap = _bitmap.restore(address, sector); status_bitmap == false) return status_bitmap;
+    auto offset = (_bitmap.get().count(false) - 1) * sizeof(Flash_crc_value<T>);
 
-    // if (_bitmap.value().is_full() == true)
-    // {
+    if (auto result_bitmap = _bitmap.store_to(sector); result_bitmap == false) return result_bitmap;
+    if (auto result_value = _value.store_to(sector.at(sector.at() + offset)); result_value == false) return result_value;
 
-    // }
-    // else
-    // {
-        
-    // }
-    
-    // auto next = _bitmap_allocate(_bitmap.value());
-    // auto offset = size_bitmap + next * sizeof(Flash_crc_value<T>);
-
-    // if (next == 0) // restart fragment
-    // {
-
-    // }
-    // else
-    // {
-    //     if (auto status_bitmap = _bitmap.update(address, sector, _bitmap.value()); status_bitmap == false) return status_bitmap;
-    //     if (auto status_value = _value.update(address + offset, sector, value); status_value == false) return status_value;
-    // }
-    
     return true;
 }
 

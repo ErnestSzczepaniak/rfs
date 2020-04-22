@@ -1,12 +1,23 @@
 #include "test.h"
-#include "flash_bitmap.h"
+#include "bitmap.h"
+
 
 TEST_CASE("test bitmap")
 {
-    Flash_bitmap bitmap;
+    Bitmap<32> bitmap;
 
-    bitmap._bitmap[0] = 0x0f;
+    bitmap.reset(false);
+    
+    REQUIRE(bitmap.is_full_of(0) == true);
 
-    REQUIRE(bitmap._busy() == 4);
-    REQUIRE(bitmap.allocate() == 4);
+    bitmap.reset(true);
+
+    REQUIRE(bitmap.is_full_of(true) == true);
+
+
+    auto w = bitmap.allocate(false);
+
+    
+    int k = 2;
+
 }

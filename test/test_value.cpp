@@ -6,13 +6,19 @@ TEST_CASE("flash variable")
 {
     _init();
 
-    Flash_sector s;
+    Flash_sector sector;
 
-    s.bind(0, &driver);
-    s.clear();
+    sector.number(0).driver(&driver).at(0).clear();
 
+    Flash_filesystem_value<int> flash_value;
 
-    Flash_value<int> f;
+    flash_value.load_from(sector.at(0));
+
+    flash_value.set(20).set(50).store_to(sector.at(0));
+
+    flash_value.load_from(sector.at(0));
+
+    REQUIRE(flash_value.get() == 50);
 
     // Flash_filesystem_value<int> value;
 
