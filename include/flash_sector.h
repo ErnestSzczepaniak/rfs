@@ -23,6 +23,7 @@ public:
     Rfs_driver * driver();
 
     Flash_sector & at(int value);
+    Flash_sector & at_offset(int value);
     int at();
 
     Status clear(int range = size_sector);

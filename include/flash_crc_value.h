@@ -38,8 +38,7 @@ template<typename T>
 Flash_crc_value<T> & Flash_crc_value<T>::set(T value)
 {
     _value.set(value);
-    _crc.set(crc<32>(value));
-
+    
     return *this;
 }
 
@@ -57,6 +56,8 @@ Status Flash_crc_value<T>::load_from(Flash_sector & sector)
 template<typename T> 
 Status Flash_crc_value<T>::store_to(Flash_sector & sector)
 {
+    _crc.set(crc<32>(_value.get()));
+
     if (auto result_value = _value.store_to(sector); result_value == false) return result_value;
     if (auto result_crc = _crc.store_to(sector); result_crc == false) return result_crc;
 

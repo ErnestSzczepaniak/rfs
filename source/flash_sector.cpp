@@ -31,6 +31,13 @@ Flash_sector & Flash_sector::at(int value)
     return *this;
 }
 
+Flash_sector & Flash_sector::at_offset(int value)
+{
+    _at += value;
+
+    return *this;
+}
+
 int Flash_sector::at()
 {
     return _at;
@@ -38,5 +45,10 @@ int Flash_sector::at()
 
 Status Flash_sector::clear(int range)
 {
-    return _driver->clear(_at, range);
+    if (_at + range > size_sector) return error::argument::Out_of_range();
+    if (auto status_clear = _driver->clear(_number * size_sector + _at, range); status_clear == false) return status_clear;
+
+    _at += range;
+
+    return true;
 }
