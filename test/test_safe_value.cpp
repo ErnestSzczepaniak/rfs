@@ -4,21 +4,27 @@
 
 TEST_CASE("test safe value")
 {
-    _init();
+    // _init();
 
-    Flash_sector sector0, sector1;
+    // Flash_sector sector0, sector1;
 
-    sector0.number(0).driver(&driver).at(0).clear();
-    sector1.number(1).driver(&driver).at(0).clear();
+    // sector0.number(0).driver(&driver).at(0).clear();
+    // sector1.number(1).driver(&driver).at(0).clear();
 
-    Flash_safe_value<int> flash_value(0, sector0, sector1);
+    // Flash_safe_value<int> flash_value(0, sector0, sector1);
 
-    auto result = flash_value.load();
+    // auto result = flash_value.load();
 
-    result = flash_value.set(100).store();
+    // for (int i = 0; i < 15; i++)
+    // {
+    //     flash_value.set(i).store();
+    //     flash_value.load();
+    //     REQUIRE(flash_value.get() == i);
+    // }
+    
 
-    printf("Type: [%s], Category: [%s], Brief: [%s]\n", result.type(), result.category(), result.brief());
-    printf("File: [%s], Function [%s], Line [%d]\n", result.file(), result.function(), result.line());
+    // printf("Type: [%s], Category: [%s], Brief: [%s]\n", result.type(), result.category(), result.brief());
+    // printf("File: [%s], Function [%s], Line [%d]\n", result.file(), result.function(), result.line());
 
     //flash_value.set(10);
 

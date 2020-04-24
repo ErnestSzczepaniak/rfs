@@ -10,11 +10,10 @@
 **/
 
 constexpr auto size_sector =        512;
-constexpr auto number_sectors =     2;
-constexpr auto size_flash = size_sector * number_sectors;
+constexpr auto number_sectors =     5;
+constexpr auto number_bits =        16;
 
-constexpr auto size_bitmap =        6;
-constexpr auto number_bits = size_bitmap * 8;
+constexpr auto size_flash = size_sector * number_sectors;
 
 struct Rfs_driver
 {

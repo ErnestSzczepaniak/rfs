@@ -60,7 +60,7 @@ Flash_safe_value<T>::~Flash_safe_value()
 template<typename T> 
 T & Flash_safe_value<T>::get()
 {   
-
+    return _value_primary.get();
 }
 
 template<typename T> 

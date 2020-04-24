@@ -15,9 +15,12 @@
 
 class Flash_sector
 {
+    struct Sector {unsigned char byte[size_sector];};
+    
 public:
     Flash_sector & number(int value);
     int number();
+    int address();
 
     Flash_sector & driver(Rfs_driver * driver);
     Rfs_driver * driver();
@@ -26,6 +29,9 @@ public:
     Flash_sector & at_offset(int value);
     int at();
 
+    Status move_to(Flash_sector & other);
+
+    Result<bool> is_empty();
     Status clear(int range = size_sector);
     template<typename T> Result<T> read();
     template<typename T> Status write(T & value);

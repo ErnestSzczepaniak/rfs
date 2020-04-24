@@ -12,6 +12,11 @@ int Flash_sector::number()
     return _number;
 }
 
+int Flash_sector::address()
+{
+    return _number * size_sector;
+}
+
 Flash_sector & Flash_sector::driver(Rfs_driver * driver)
 {
     _driver = driver;
@@ -43,6 +48,18 @@ int Flash_sector::at()
     return _at;
 }
 
+Result<bool> Flash_sector::is_empty()
+{
+    Result<bool> result;
+
+    auto [status, byte] = at(0).read<unsigned char>();
+    if (status == false) return status;
+
+    result.value = (byte == 0xff);
+
+    return result;
+}
+
 Status Flash_sector::clear(int range)
 {
     if (_at + range > size_sector) return error::argument::Out_of_range();
@@ -51,4 +68,15 @@ Status Flash_sector::clear(int range)
     _at += range;
 
     return true;
+}
+
+Status Flash_sector::move_to(Flash_sector & other)
+{
+    auto status_clear = other.at(0).clear();
+    if (status_clear == false) return status_clear;
+
+    auto [status_read, sector] = at(0).read<Sector>();
+    if (status_read == false) return status_read;
+
+    return other.at(0).write(sector);
 }
