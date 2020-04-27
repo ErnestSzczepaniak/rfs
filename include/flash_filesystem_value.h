@@ -15,7 +15,7 @@
 template<typename T>
 class Flash_filesystem_value
 {
-    using Flash_bitmap = Bitmap<number_bits>;
+    using Flash_bitmap = Bitmap<number_bits, true>;
     static constexpr auto size_total = sizeof(Flash_bitmap) + number_bits * sizeof(Flash_crc_value<T>);
 
 public:
@@ -52,7 +52,7 @@ template<typename T>
 Status Flash_filesystem_value<T>::load_from(Flash_sector & sector)
 {
     if (auto result_bitmap = _bitmap.load_from(sector); result_bitmap == false) return result_bitmap;
-    if (_bitmap.get().is_full_of(true)) return warning::value::Empty();
+    if (_bitmap.get().is_empty()) return warning::value::Empty();
 
     auto offset = (usage() - 1) * sizeof(Flash_crc_value<T>);
 
@@ -68,13 +68,16 @@ Status Flash_filesystem_value<T>::store_to(Flash_sector & sector)
 
     if (auto result_bitmap = _bitmap.load_from(sector); result_bitmap == false) return result_bitmap;
 
-    if (_bitmap.get().is_full_of(false))
+    if (_bitmap.get().is_full())
     {
         if (auto result_clear = sector.at(base_address).clear(size_total); result_clear == false) return result_clear;
-        _bitmap.get().reset(true);
+        _bitmap.get().reset();
     }
 
-    auto offset = _bitmap.get().allocate(false) * sizeof(Flash_crc_value<T>);
+    auto number_of_set = _bitmap.get().count_set();
+    _bitmap.get().set(number_of_set);
+
+    auto offset = number_of_set * sizeof(Flash_crc_value<T>);
 
     if (auto result_bitmap = _bitmap.store_to(sector.at(base_address)); result_bitmap == false) return result_bitmap;
     if (auto result_value = _value.store_to(sector.at_offset(offset)); result_value == false) return result_value;
@@ -100,7 +103,7 @@ Status Flash_filesystem_value<T>::recover_from(Flash_sector & sector)
 template<typename T>
 int Flash_filesystem_value<T>::usage()
 {
-    return _bitmap.get().count(false);
+    return _bitmap.get().count_set();
 }
 
 #endif /* define: flash_filesystem_value_h */

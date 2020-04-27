@@ -6,17 +6,17 @@ TEST_CASE("test bitmap")
 {
     Bitmap<32> bitmap;
 
-    bitmap.reset(false);
+    bitmap.reset();
     
-    REQUIRE(bitmap.is_full_of(0) == true);
+    REQUIRE(bitmap.is_empty() == true);
 
-    bitmap.reset(true);
-
-    REQUIRE(bitmap.is_full_of(true) == true);
-
-
-    auto w = bitmap.allocate(false);
-
+    for (int i = 0; i < 32; i++)
+    {
+        bitmap.set(i);
+        REQUIRE(bitmap.count_set() == i + 1);
+    }
+    
+    REQUIRE(bitmap.is_full() == true);
     
     int k = 2;
 

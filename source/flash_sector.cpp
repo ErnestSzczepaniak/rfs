@@ -69,14 +69,3 @@ Status Flash_sector::clear(int range)
 
     return true;
 }
-
-Status Flash_sector::move_to(Flash_sector & other)
-{
-    auto status_clear = other.at(0).clear();
-    if (status_clear == false) return status_clear;
-
-    auto [status_read, sector] = at(0).read<Sector>();
-    if (status_read == false) return status_read;
-
-    return other.at(0).write(sector);
-}

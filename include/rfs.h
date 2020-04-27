@@ -11,7 +11,7 @@
 
 constexpr auto size_sector =        512;
 constexpr auto number_sectors =     5;
-constexpr auto number_bits =        16;
+constexpr auto number_bits =        8;
 
 constexpr auto size_flash = size_sector * number_sectors;
 

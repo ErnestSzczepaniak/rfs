@@ -11,85 +11,97 @@
 
 #include "string.h"
 
-template<int size>
+template<int size, bool initial = true>
 class Bitmap
 {   
     static_assert(size % 8 == 0);
+    static constexpr unsigned char _mask[8] = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
 
 public:
     bool get(int bit);
-    Bitmap & set(int bit, bool value);
+    Bitmap & set(int bit);
 
-    int count(bool value);
+    int count_set();
+    int count_not_set();
 
-    bool is_full_of(bool value);
+    bool is_empty();
+    bool is_full();
 
-    Bitmap & reset(bool value);
-    int allocate(bool value);
+    Bitmap & reset();
 
 private:
     unsigned char _byte[size / 8];
 
 }; /* class: Flash_bitmap */
 
-template<int size>
-bool Bitmap<size>::get(int bit)
+template<int size, bool initial>
+bool Bitmap<size, initial>::get(int bit)
 {
-    if (bit < size)
-    {
-        return _byte[bit / 8] & (0x80 >> (bit % 8));
-    }
-    else return false;
+    return (_byte[bit / 8] & _mask[bit % 8]);
 }
 
-template<int size>
-Bitmap<size> & Bitmap<size>::set(int bit, bool value)
+template<int size, bool initial>
+Bitmap<size, initial> & Bitmap<size, initial>::set(int bit)
 {
-    if (bit < size)
+    if constexpr (initial == true)
     {
-        _byte[bit / 8] = value ? (_byte[bit / 8] | (0x80 >> (bit % 8))) : (_byte[bit / 8] & ~(0x80 >> (bit % 8)));
+        _byte[bit / 8] &= ~_mask[bit % 8];
+    } 
+    else if constexpr (initial == false)
+    {
+        _byte[bit / 8] |= _mask[bit % 8];
     }
 
     return *this;
 }
 
-template<int size>
-int Bitmap<size>::count(bool value)
+template<int size, bool initial>
+int Bitmap<size, initial>::count_set()
 {
     int count = 0;
 
     for (int i = 0; i < size; i++)
     {
-        if (get(i) == value) count++;
-        else return count;
+        if constexpr (initial == true) 
+        {
+            if (get(i) == false) count++;
+        }
+        else if constexpr (initial == false)
+        {
+            if (get(i) == true) count++;
+        }
     }
+
     return count;
 }
 
-template<int size>
-bool Bitmap<size>::is_full_of(bool value)
+template<int size, bool initial>
+bool Bitmap<size, initial>::is_full()
 {
-    for (int i = 0; i < size / 8; i++)
-    {
-        if (value ? _byte[i] != 0xff : _byte[i] != 0) return false;
-    }
-    
-    return true;
+    return (count_set() == size);
 }
 
-template<int size>
-Bitmap<size> & Bitmap<size>::reset(bool value)
+template<int size, bool initial>
+bool Bitmap<size, initial>::is_empty()
 {
-    value ? memset(_byte, 0xff, size / 8) : memset(_byte, 0, size / 8);
+    return (count_set() == 0);
+}
+
+template<int size, bool initial>
+Bitmap<size, initial> & Bitmap<size, initial>::reset()
+{
+    if constexpr (initial == true)
+    {
+        memset(_byte, 0xff, size / 8);
+    }  
+    else if constexpr (initial == false)
+    {
+        memset(_byte, 0, size / 8);
+    }
+
     return *this;
 }
 
-template<int size>
-int Bitmap<size>::allocate(bool value)
-{
-    auto temp = count(value);
-    set(temp, value);
-    return temp;
-}
+
 
 #endif /* define: bitmap_h */

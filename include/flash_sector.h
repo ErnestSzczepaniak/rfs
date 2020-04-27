@@ -15,8 +15,6 @@
 
 class Flash_sector
 {
-    struct Sector {unsigned char byte[size_sector];};
-    
 public:
     Flash_sector & number(int value);
     int number();
@@ -28,8 +26,6 @@ public:
     Flash_sector & at(int value);
     Flash_sector & at_offset(int value);
     int at();
-
-    Status move_to(Flash_sector & other);
 
     Result<bool> is_empty();
     Status clear(int range = size_sector);

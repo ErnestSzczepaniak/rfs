@@ -34,7 +34,9 @@ public:
     Status reset();
 
     Status push(T value);
-    Result<T> pop();
+    Result<T> at(int index);    
+
+    Result<bool> pop();
 
     bool is_full();
     bool is_empty();
@@ -44,10 +46,10 @@ public:
 
 protected:
     Info _head_info();
-    Info _tail_info();
+    Info _tail_info(int index);
 
     Status _head_update();
-    Status _size_update(bool direction);
+    Status _size_update(int value);
 
 private:
     Flash_sector _sector[size_sector];
@@ -107,38 +109,57 @@ Status Flash_ring_buffer<T>::push(T value)
 
     if (head_address % size_sector == 0)
     {
-        auto [status_empty, empty] = head_sector.is_empty(); 
+        auto [status_empty, empty] = head_sector.is_empty();
         if (status_empty == false) return status_empty;
 
         if (empty == false)
         {
             if (auto status_clear = head_sector.at(0).clear(); status_clear == false) return status_clear;
-            if (auto status_size = _size.set(_size.get() - items_per_sector).store(); status_size == false) return status_size;
+
+            if (_size.get() == items_per_buffer)
+            {
+                if (auto status_size = _size_update(-(int)items_per_sector); status_size == false) return status_size;
+            }
         }
     }
 
     Buffer _buffer;
-
     if (auto status_buffer = _buffer.set(value).store_to(head_sector.at(head_offset)); status_buffer == false) return status_buffer;
+    
     if (auto status_update_head = _head_update(); status_update_head == false) return status_update_head;
-    if (auto status_update_size = _size_update(true); status_update_size == false) return status_update_size;
+    if (auto status_update_size = _size_update(+1); status_update_size == false) return status_update_size;
+
+    return true;
 }
 
-template<typename T> 
-Result<T> Flash_ring_buffer<T>::pop()
+template<typename T>
+Result<T> Flash_ring_buffer<T>::at(int index)
 {
     Result<T> result;
 
     if (is_empty()) return warning::value::Empty();
+    if (index > size_actual()) return error::argument::Out_of_range();
 
-    auto [tail_address, tail_offset, tail_sector] = _tail_info();
+    auto [tail_address, tail_offset, tail_sector] = _tail_info(index);
 
     Buffer _buffer;
-
     if (auto status_buffer = _buffer.load_from(tail_sector.at(tail_offset)); status_buffer == false) return status_buffer;
-    if (auto status_update_size = _size_update(false); status_update_size == false) return status_update_size;
 
     result.value = _buffer.get();
+
+    return result;
+}
+
+template<typename T> 
+Result<bool> Flash_ring_buffer<T>::pop()
+{
+    Result<bool> result;
+
+    if (is_empty()) return warning::value::Empty();
+
+    if (auto status_update_size = _size_update(-1); status_update_size == false) return status_update_size;
+
+    result.value = true;
 
     return result;
 }
@@ -180,9 +201,20 @@ typename Flash_ring_buffer<T>::Info Flash_ring_buffer<T>::_head_info()
 }
 
 template<typename T>
-typename Flash_ring_buffer<T>::Info Flash_ring_buffer<T>::_tail_info()
+typename Flash_ring_buffer<T>::Info Flash_ring_buffer<T>::_tail_info(int index)
 {
-    auto address = _head.get() + size_buffer - size_actual() * size_item;
+    auto size_desired = _size.get() - index;
+
+    int address;
+    if (_head.get()  - size_desired * size_item < _sector[2].address())
+    {
+        address = _head.get() + size_buffer - size_desired * size_item;
+    }
+    else
+    {
+        address =  _head.get() - size_desired * size_item;
+    }
+
     auto & sector = _sector[address / size_sector];
     auto offset = address - sector.address();
 
@@ -193,25 +225,21 @@ template<typename T>
 Status Flash_ring_buffer<T>::_head_update()
 {
     _head.set((_head.get() + size_item));
+
     if (_head.get() == size_flash) _head.set(_sector[2].address());
 
     return _head.store();
 }
 
 template<typename T>
-Status Flash_ring_buffer<T>::_size_update(bool direction)
+Status Flash_ring_buffer<T>::_size_update(int value)
 {
-    if (direction == true)
-    {
-        if (_size.get() < items_per_buffer) _size.set(_size.get() + 1);
-    }
-    else
-    {
-        if (_size.get() > 0) _size.set(_size.get() - 1);
-    }
+    _size.set(_size.get() + value);
+
+    if (_size.get() > items_per_buffer) _size.set(items_per_buffer);
+    if (_size.get() < 0) _size.set(0);
 
     return _size.store();
 }
-
 
 #endif /* define: flash_ring_buffer_h */
