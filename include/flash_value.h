@@ -18,8 +18,8 @@ public:
     T & get();
     Flash_value & set(T value);
 
-    Status load_from(Flash_sector & sector);
-    Status store_to(Flash_sector & sector);
+    Status load(Flash_sector & sector);
+    Status store(Flash_sector & sector);
 
 private:
     T _value;
@@ -40,7 +40,7 @@ Flash_value<T> & Flash_value<T>::set(T value)
 }
 
 template<typename T> 
-Status Flash_value<T>::load_from(Flash_sector & sector)
+Status Flash_value<T>::load(Flash_sector & sector)
 {
     auto result = sector.read<T>();
     if (result.status == false) return result.status;
@@ -51,7 +51,7 @@ Status Flash_value<T>::load_from(Flash_sector & sector)
 }
 
 template<typename T> 
-Status Flash_value<T>::store_to(Flash_sector & sector)
+Status Flash_value<T>::store(Flash_sector & sector)
 {
     if (auto status_write = sector.write(_value); status_write == false) return status_write;
 
