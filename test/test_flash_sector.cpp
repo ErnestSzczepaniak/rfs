@@ -5,7 +5,7 @@
 TEST_CASE("sector is empty")
 {
     Flash_driver_file driver;
-    Flash_sector sector(0, driver);
+    Flash_sector sector(0, &driver);
 
     driver.init();
 
@@ -22,7 +22,7 @@ TEST_CASE("sector is empty")
 TEST_CASE("sector is full")
 {
     Flash_driver_file driver;
-    Flash_sector sector(0, driver);
+    Flash_sector sector(0, &driver);
 
     driver.init();
 
@@ -39,7 +39,7 @@ TEST_CASE("sector is full")
 TEST_CASE("sector clear")
 {
     Flash_driver_file driver;
-    Flash_sector sector(0, driver);
+    Flash_sector sector(0, &driver);
 
     driver.init();
 
@@ -68,7 +68,7 @@ TEST_CASE("sector clear")
 TEST_CASE("sector write driver read")
 {
     Flash_driver_file driver;
-    Flash_sector sector(0, driver);
+    Flash_sector sector(0, &driver);
 
     driver.init();
 
@@ -86,7 +86,7 @@ TEST_CASE("sector write driver read")
 TEST_CASE("sector read driver write")
 {
     Flash_driver_file driver;
-    Flash_sector sector(0, driver);
+    Flash_sector sector(0, &driver);
 
     driver.init();
 
@@ -103,7 +103,7 @@ TEST_CASE("sector read driver write")
 TEST_CASE("sector at moving write")
 {
     Flash_driver_file driver;
-    Flash_sector sector(0, driver);
+    Flash_sector sector(0, &driver);
 
     driver.init();
 
@@ -121,7 +121,7 @@ TEST_CASE("sector at moving write")
 TEST_CASE("sector at moving read")
 {
     Flash_driver_file driver;
-    Flash_sector sector(0, driver);
+    Flash_sector sector(0, &driver);
 
     driver.init();
 
@@ -137,7 +137,7 @@ TEST_CASE("sector at moving read")
 TEST_CASE("sector write read")
 {
     Flash_driver_file driver;
-    Flash_sector sector(0, driver);
+    Flash_sector sector(0, &driver);
 
     driver.init();
 

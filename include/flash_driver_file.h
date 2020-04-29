@@ -9,6 +9,8 @@
  * @details	
 **/
 
+#ifdef build_platform_host
+
 #include "flash_driver_generic.h"
 #include <fstream>
 
@@ -33,5 +35,6 @@ private:
 
 }; /* class: Flash_driver_file */
 
+#endif
 
 #endif /* define: flash_driver_file_h */

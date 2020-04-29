@@ -1,3 +1,5 @@
+#ifdef build_platform_host
+
 #include "flash_driver_file.h"
 
 bool Flash_driver_file::init()
@@ -58,3 +60,5 @@ bool Flash_driver_file::erase(int address, int span)
 
     return true;
 }
+
+#endif

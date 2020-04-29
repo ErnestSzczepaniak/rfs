@@ -5,7 +5,7 @@
 TEST_CASE("value store driver read")
 {
     Flash_driver_file driver;
-    Flash_sector sector(0, driver);
+    Flash_sector sector(0, &driver);
     Flash_value<int> value;
 
     driver.init();
@@ -24,7 +24,7 @@ TEST_CASE("value store driver read")
 TEST_CASE("value load driver write")
 {
     Flash_driver_file driver;
-    Flash_sector sector(0, driver);
+    Flash_sector sector(0, &driver);
     Flash_value<int> value;
 
     driver.init();
@@ -42,7 +42,7 @@ TEST_CASE("value load driver write")
 TEST_CASE("value store load")
 {
     Flash_driver_file driver;
-    Flash_sector sector(0, driver);
+    Flash_sector sector(0, &driver);
     Flash_value<int> value;
 
     driver.init();

@@ -1,11 +1,12 @@
 #include "test.h"
 #include "flash_value_crc.h"
 #include "flash_driver_file.h"
+#include "crc.h"
 
 TEST_CASE("value crc store driver read")
 {
     Flash_driver_file driver;
-    Flash_sector sector(0, driver);
+    Flash_sector sector(0, &driver);
     Flash_value_crc<int, crc<32>> value;
 
     driver.init();
@@ -27,7 +28,7 @@ TEST_CASE("value crc store driver read")
 TEST_CASE("value crc load driver write")
 {
     Flash_driver_file driver;
-    Flash_sector sector(0, driver);
+    Flash_sector sector(0, &driver);
     Flash_value_crc<int, crc<32>> value;
 
     driver.init();
@@ -49,7 +50,7 @@ TEST_CASE("value crc load driver write")
 TEST_CASE("value crc store load")
 {
     Flash_driver_file driver;
-    Flash_sector sector(0, driver);
+    Flash_sector sector(0, &driver);
     Flash_value_crc<int, crc<32>> value;
 
     driver.init();
@@ -69,7 +70,7 @@ TEST_CASE("value crc store load")
 TEST_CASE("value crc mismatch")
 {
     Flash_driver_file driver;
-    Flash_sector sector(0, driver);
+    Flash_sector sector(0, &driver);
     Flash_value_crc<int, crc<32>> value;
 
     driver.init();

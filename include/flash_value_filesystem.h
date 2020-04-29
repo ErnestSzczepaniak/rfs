@@ -12,15 +12,15 @@
 #include "flash_value_crc.h"
 #include "flash_bitmap.h"
 
-template<typename T, Crc_generator<T> generator, int bits>
+template<typename T, CRC<T> crc, int bits = 8>
 class Flash_value_filesystem
 {
+    using Value = Flash_value_crc<T, crc>;
     using Bitmap = Flash_value<Flash_bitmap<bits>>;
-    using Value = Flash_value_crc<T, generator>;
 
 public:
     T & get();
-    Flash_value_filesystem<T, generator, bits> & set(T value);
+    Flash_value_filesystem & set(T value);
 
     Status load(Flash_sector & sector);
     Status store(Flash_sector & sector);
@@ -38,22 +38,22 @@ private:
 
 }; /* class: Flash_value_filesystem */
 
-template<typename T, Crc_generator<T> generator, int bits>
-T & Flash_value_filesystem<T, generator, bits>::get()
+template<typename T, CRC<T> crc, int bits>
+T & Flash_value_filesystem<T, crc, bits>::get()
 {
     return _value.get();
 }
 
-template<typename T, Crc_generator<T> generator, int bits>
-Flash_value_filesystem<T, generator, bits> & Flash_value_filesystem<T, generator, bits>::set(T value)
+template<typename T, CRC<T> crc, int bits>
+Flash_value_filesystem<T, crc, bits> & Flash_value_filesystem<T, crc, bits>::set(T value)
 {
     _value.set(value);
 
     return *this;
 }
 
-template<typename T, Crc_generator<T> generator, int bits>
-Status Flash_value_filesystem<T, generator, bits>::load(Flash_sector & sector)
+template<typename T, CRC<T> crc, int bits>
+Status Flash_value_filesystem<T, crc, bits>::load(Flash_sector & sector)
 {
     if (auto result_bitmap = _bitmap.load(sector); result_bitmap == false) return result_bitmap;
     
@@ -66,8 +66,8 @@ Status Flash_value_filesystem<T, generator, bits>::load(Flash_sector & sector)
     return true;
 }
 
-template<typename T, Crc_generator<T> generator, int bits>
-Status Flash_value_filesystem<T, generator, bits>::store(Flash_sector & sector)
+template<typename T, CRC<T> crc, int bits>
+Status Flash_value_filesystem<T, crc, bits>::store(Flash_sector & sector)
 {
     auto base_address = sector.at();
 
@@ -83,31 +83,37 @@ Status Flash_value_filesystem<T, generator, bits>::store(Flash_sector & sector)
 
     auto offset = sizeof(Bitmap) + next_index * sizeof(Value);
 
-    return _value.store(sector.at(offset));
+    return _value.store(sector.at(base_address + offset));
 }
 
-template<typename T, Crc_generator<T> generator, int bits>
-Status Flash_value_filesystem<T, generator, bits>::recover(Flash_sector & sector)
+template<typename T, CRC<T> crc, int bits>
+Status Flash_value_filesystem<T, crc, bits>::recover(Flash_sector & sector)
 {
+    auto base_address = sector.at();
+
     if (usage() > 1)
     {
         auto offset = sizeof(Bitmap) + (usage() - 2) * sizeof(Value);
 
-        return _value.load(sector.at(offset));
+        if (auto status_load = _value.load(sector.at(base_address + offset)); status_load == false) return status_load;
+
+        sector.at(base_address);
+
+        return store(sector);
     }
     else return false;
 }
 
-template<typename T, Crc_generator<T> generator, int bits>
-int Flash_value_filesystem<T, generator, bits>::usage()
+template<typename T, CRC<T> crc, int bits>
+int Flash_value_filesystem<T, crc, bits>::usage()
 {
     return _bitmap.get().count(false);
 }
 
 /* ---------------------------------------------| info |--------------------------------------------- */
 
-template<typename T, Crc_generator<T> generator, int bits>
-Result<int> Flash_value_filesystem<T, generator, bits>::_allocate(Flash_sector & sector)
+template<typename T, CRC<T> crc, int bits>
+Result<int> Flash_value_filesystem<T, crc, bits>::_allocate(Flash_sector & sector)
 {
     Result<int> result;
 

@@ -35,18 +35,4 @@ public:
 
 }; /* class: Flash_driver_generic */
 
-class Flash_driver_dummy : public Flash_driver_generic
-{
-public:
-    bool init() {return true;}
-    bool deinit() {return true;}
-
-    bool read(int, int, unsigned char *) {return true;}
-    bool write(int, int, unsigned char *) {return true;}
-    bool erase(int, int) {return true;}
-
-}; /* class: Flash_driver_dummy */
-
-static Flash_driver_dummy _flash_driver_dummy;
-
 #endif /* define: flash_driver_generic_h */

@@ -9,13 +9,12 @@
  * @details	
 **/
 
-#include "crc.h"
 #include "flash_value.h"
 
 template<typename T>
-using Crc_generator = unsigned int (*)(T &);
+using CRC = unsigned int (*)(T &);
 
-template<typename T, Crc_generator<T> generator>
+template<typename T, CRC<T> crc>
 class Flash_value_crc
 {
 public:
@@ -31,35 +30,34 @@ private:
 
 }; /* class: Flash_value_crc */
 
-template<typename T, Crc_generator<T> generator> 
-T & Flash_value_crc<T, generator>::get()
+template<typename T, CRC<T> crc> 
+T & Flash_value_crc<T, crc>::get()
 {
     return _value.get();
 }
 
-template<typename T, Crc_generator<T> generator> 
-Flash_value_crc<T, generator> & Flash_value_crc<T, generator>::set(T value)
+template<typename T, CRC<T> crc> 
+Flash_value_crc<T, crc> & Flash_value_crc<T, crc>::set(T value)
 {
     _value.set(value);
     
     return *this;
 }
 
-template<typename T, Crc_generator<T> generator>  
-Status Flash_value_crc<T, generator>::load(Flash_sector & sector)
+template<typename T, CRC<T> crc>  
+Status Flash_value_crc<T, crc>::load(Flash_sector & sector)
 {
     if (auto result_value = _value.load(sector); result_value == false) return result_value;
     if (auto result_crc = _crc.load(sector); result_crc == false) return result_crc;
-
-    if (_crc.get() != generator(_value.get())) return error::frame::Crc_mismatch();
+    if (_crc.get() != crc(_value.get())) return error::frame::Crc_mismatch();
 
     return true;
 }
 
-template<typename T, Crc_generator<T> generator>  
-Status Flash_value_crc<T, generator>::store(Flash_sector & sector)
+template<typename T, CRC<T> crc>  
+Status Flash_value_crc<T, crc>::store(Flash_sector & sector)
 {
-    _crc.set(generator(_value.get()));
+    _crc.set(crc(_value.get()));
 
     if (auto result_value = _value.store(sector); result_value == false) return result_value;
     if (auto result_crc = _crc.store(sector); result_crc == false) return result_crc;
