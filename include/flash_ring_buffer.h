@@ -198,6 +198,7 @@ Result<T> Flash_ring_buffer<T, crc>::at(int index)
 }
 
 /* ---------------------------------------------| info |--------------------------------------------- */
+
 template<typename T, CRC<T> crc> 
 typename Flash_ring_buffer<T, crc>::Info Flash_ring_buffer<T, crc>::_head_info()
 {

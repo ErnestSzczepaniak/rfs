@@ -3,7 +3,7 @@
 #include "flash_driver_file.h"
 #include "crc.h"
 
-TEST_CASE("buffer init")
+TEST_CASE("buffer reset")
 {
     Flash_driver_file driver;
     Flash_ring_buffer<int, crc<32>> buffer(&driver);
@@ -12,14 +12,103 @@ TEST_CASE("buffer init")
 
     buffer.reset();
 
-    for (int i = 0; i < 191; i++)
+    REQUIRE(buffer.size_actual() == 0);
+
+    auto size = ((Flash_driver_generic::number_sector() - 2) * Flash_driver_generic::size_sector()) / sizeof(Flash_value_crc<int, crc<32>>);
+
+    REQUIRE(buffer.size_max() == size);
+
+    driver.deinit();
+}
+
+TEST_CASE("buffer push")
+{
+    Flash_driver_file driver;
+    Flash_ring_buffer<int, crc<32>> buffer(&driver);
+
+    driver.init();
+
+    buffer.reset();
+
+    for (int i = 0; i < buffer.size_max(); i++)
     {
         buffer.push(i);
     }
     
-    auto s = buffer.size_actual();
-
-    buffer.push(2);
+    REQUIRE(buffer.size_actual() == buffer.size_max());
 
     driver.deinit();
+}
+
+TEST_CASE("buffer pop")
+{
+    Flash_driver_file driver;
+    Flash_ring_buffer<int, crc<32>> buffer(&driver);
+
+    driver.init();
+
+    buffer.reset();
+
+    for (int i = 0; i < buffer.size_max(); i++)
+    {
+        buffer.push(i);
+    }
+    
+    for (int i = 0; i < buffer.size_max(); i++)
+    {
+        buffer.pop();
+    }
+
+    REQUIRE(buffer.size_actual() == 0);
+
+    driver.deinit();
+}
+
+TEST_CASE("buffer at")
+{
+    Flash_driver_file driver;
+    Flash_ring_buffer<int, crc<32>> buffer(&driver);
+
+    driver.init();
+
+    buffer.reset();
+
+    for (int i = 0; i < buffer.size_max(); i++)
+    {
+        buffer.push(i);
+    }
+    
+    for (int i = 0; i < buffer.size_max(); i++)
+    {
+        REQUIRE(buffer.at(i).value == i);
+    }
+
+    driver.deinit();
+}
+
+TEST_CASE("buffer overflow")
+{
+    Flash_driver_file driver;
+    Flash_ring_buffer<int, crc<32>> buffer(&driver);
+
+    driver.init();
+
+    buffer.reset();
+
+    for (int i = 0; i < buffer.size_max() + 1; i++)
+    {
+        buffer.push(i);
+    }
+    
+    auto items = Flash_driver_generic::size_sector() / sizeof(Flash_value_crc<int, crc<32>>);
+    auto size = buffer.size_max() - items + 1;
+
+    REQUIRE(buffer.size_actual() == size);
+
+    for (int i = 0; i < buffer.size_actual(); i++)
+    {
+        REQUIRE(buffer.at(i).value == i + items);
+    }
+    
+    driver.deinit();   
 }
