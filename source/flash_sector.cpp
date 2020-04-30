@@ -89,9 +89,10 @@ Result<bool> Flash_sector::is_full()
 Status Flash_sector::clear(int range)
 {
     if (range == 0) range = Flash_driver_generic::size_sector(); 
-    if (_at + range > Flash_driver_generic::size_sector()) return error::argument::Out_of_range();
-    if (_driver == nullptr) return error::driver::Not_present(); 
-    if (_driver->erase(_number * _driver->size_sector() + _at, range) == false) return error::driver::Failure();
+    
+    if (_at + range > Flash_driver_generic::size_sector()) return status::error::argument::Out_of_range();
+    if (_driver == nullptr) return status::error::driver::Not_present(); 
+    if (_driver->erase(_number * _driver->size_sector() + _at, range) == false) return status::error::driver::Failure();
 
     _at += range;
 

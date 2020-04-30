@@ -49,7 +49,7 @@ Status Flash_value_crc<T, crc>::load(Flash_sector & sector)
 {
     if (auto result_value = _value.load(sector); result_value == false) return result_value;
     if (auto result_crc = _crc.load(sector); result_crc == false) return result_crc;
-    if (_crc.get() != crc(_value.get())) return error::frame::Crc_mismatch();
+    if (_crc.get() != crc(_value.get())) return status::error::frame::Crc_mismatch();
 
     return true;
 }

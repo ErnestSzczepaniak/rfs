@@ -40,7 +40,7 @@ TEST_CASE("value crc load driver write")
     driver.write(sizeof(int), sizeof(unsigned int), (unsigned char *) &crc);
 
     auto result = value.load(sector);
-    REQUIRE(result == status::Success());
+    REQUIRE(result == status::binary::Success());
 
     REQUIRE(value.get() == tx);
 
@@ -60,7 +60,7 @@ TEST_CASE("value crc store load")
     sector.at(sector.at() - sizeof(Flash_value_crc<int, crc<32>>));
 
     auto result = value.load(sector);
-    REQUIRE(result == status::Success());
+    REQUIRE(result == status::binary::Success());
 
     REQUIRE(value.get() == 0xdeadbeef);
 
@@ -83,7 +83,7 @@ TEST_CASE("value crc mismatch")
     sector.at(sector.at() - sizeof(Flash_value_crc<int, crc<32>>));
 
     auto result = value.load(sector);
-    REQUIRE(result == error::frame::Crc_mismatch());
+    REQUIRE(result == status::error::frame::Crc_mismatch());
 
     driver.deinit(); 
 }

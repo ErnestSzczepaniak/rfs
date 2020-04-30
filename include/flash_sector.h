@@ -51,9 +51,9 @@ Result<T> Flash_sector::read()
 {
     Result<T> result;
 
-    if (_at + sizeof(T) > Flash_driver_generic::size_sector()) return error::argument::Out_of_range();
-    if (_driver == nullptr) return error::driver::Not_present();
-    if (_driver->read(_number * Flash_driver_generic::size_sector() + _at, sizeof(T), (unsigned char *) &result.value) == false) return error::driver::Read();
+    if (_at + sizeof(T) > Flash_driver_generic::size_sector()) return status::error::argument::Out_of_range();
+    if (_driver == nullptr) return status::error::driver::Not_present();
+    if (_driver->read(_number * Flash_driver_generic::size_sector() + _at, sizeof(T), (unsigned char *) &result.value) == false) return status::error::driver::Read();
  
     _at += sizeof(T);
 
@@ -63,9 +63,9 @@ Result<T> Flash_sector::read()
 template<typename T>
 Status Flash_sector::write(T & value)
 {
-    if (_at + sizeof(T) > Flash_driver_generic::size_sector()) return error::argument::Size_mismatch();
-    if (_driver == nullptr) return error::driver::Not_present();    
-    if (_driver->write(_number * Flash_driver_generic::size_sector() + _at, sizeof(T), (unsigned char *) &value) == false) return error::driver::Write();
+    if (_at + sizeof(T) > Flash_driver_generic::size_sector()) return status::error::argument::Size_mismatch();
+    if (_driver == nullptr) return status::error::driver::Not_present();    
+    if (_driver->write(_number * Flash_driver_generic::size_sector() + _at, sizeof(T), (unsigned char *) &value) == false) return status::error::driver::Write();
  
     _at += sizeof(T);
 

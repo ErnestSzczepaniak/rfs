@@ -26,7 +26,7 @@ set(dependency_external_common  )
 set(dependency_external_target  )
 set(dependency_external_host    )
 
-set(dependency_scope            PRIVATE)
+set(dependency_scope            PUBLIC)
 
 # ---------------------------------------------| target |--------------------------------------------- #
 

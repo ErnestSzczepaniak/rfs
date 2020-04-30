@@ -170,7 +170,7 @@ Result<bool> Flash_ring_buffer<T, crc>::pop()
 {
     Result<bool> result;
 
-    if (is_empty()) return warning::value::Empty();
+    if (is_empty()) return status::warning::possible::Value_empty();
 
     if (auto status_update_size = _size_update(-1); status_update_size == false) return status_update_size;
 
@@ -184,8 +184,8 @@ Result<T> Flash_ring_buffer<T, crc>::at(int index)
 {
     Result<T> result;
 
-    if (is_empty()) return warning::value::Empty();
-    if (index > size_actual()) return error::argument::Out_of_range();
+    if (is_empty()) return status::warning::possible::Value_empty();
+    if (index > size_actual()) return status::error::argument::Out_of_range();
 
     auto [tail_address, tail_offset, tail_sector] = _tail_info_at(index);
 

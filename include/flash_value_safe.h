@@ -85,23 +85,25 @@ Status Flash_value_safe<T, crc, bits>::load()
         if (_value_primary.usage() > 0 && _value_secondary.usage() > 0)
         {
             if (_value_primary.get() != _value_secondary.get()) return _copy_primary();
-            else return true;
+
+            else return status::binary::Success();
         }
         else if (_value_primary.usage() == 0 && _value_secondary.usage() > 0) return _copy_secondary();
         else if (_value_primary.usage() > 0 && _value_primary.usage() == 0) return _copy_primary();
-        else return warning::value::Empty();
+
+        else return status::error::memory::Corruption();
     }
-    else if (status_primary == true && status_secondary == error::frame::Crc_mismatch()) // seconday 
+    else if (status_primary == true && status_secondary == status::error::frame::Crc_mismatch()) // seconday 
     {
         if (_value_primary.usage() > 0) return _copy_primary();
         else return _recover_secondary();
     }
-    else if (status_primary == error::frame::Crc_mismatch() && status_secondary == true)
+    else if (status_primary == status::error::frame::Crc_mismatch() && status_secondary == true)
     {
         if (_value_secondary.usage() > 0) return _copy_secondary();
         else return _recover_primary();
     }
-    else if (status_primary == error::frame::Crc_mismatch() && status_secondary == error::frame::Crc_mismatch())
+    else if (status_primary == status::error::frame::Crc_mismatch() && status_secondary == status::error::frame::Crc_mismatch())
     {
         if (_value_primary.usage() > _value_secondary.usage()) return _recover_primary();
         else return _recover_secondary();
@@ -126,7 +128,9 @@ Status Flash_value_safe<T, crc, bits>::_copy_primary()
 {
     _value_secondary.set(_value_primary.get());
 
-    return _value_secondary.store(_sector_secondary.at(_address));
+    if (auto status_store = _value_secondary.store(_sector_secondary.at(_address)); status_store == false) return status_store;
+
+    return status::warning::possible::Data_loss();
 }
 
 template<typename T, CRC<T> crc, int bits> 
@@ -134,7 +138,9 @@ Status Flash_value_safe<T, crc, bits>::_copy_secondary()
 {
     _value_primary.set(_value_secondary.get());
 
-    return _value_primary.store(_sector_primary.at(_address));
+    if (auto status_store = _value_primary.store(_sector_primary.at(_address)); status_store == false) return status_store;
+
+    return status::warning::possible::Data_loss();
 }
 
 template<typename T, CRC<T> crc, int bits> 
@@ -144,7 +150,9 @@ Status Flash_value_safe<T, crc, bits>::_recover_primary()
 
     _value_secondary.set(_value_primary.get());
 
-    return _value_secondary.store(_sector_secondary.at(_address)); 
+    if (auto status_store = _value_secondary.store(_sector_secondary.at(_address)); status_store == false) return status_store;
+
+    return status::warning::possible::Data_loss();
 }
 
 template<typename T, CRC<T> crc, int bits> 
@@ -154,7 +162,9 @@ Status Flash_value_safe<T, crc, bits>::_recover_secondary()
 
     _value_primary.set(_value_secondary.get());
     
-    return _value_primary.store(_sector_primary.at(_address));
+    if (auto status_store = _value_primary.store(_sector_primary.at(_address));status_store == false) return status_store;
+
+    return status::warning::possible::Data_loss();
 }
 
 #endif /* define: Flash_value_safe_h */

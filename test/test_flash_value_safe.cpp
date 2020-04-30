@@ -68,7 +68,7 @@ TEST_CASE("value safe load healthy")
     secondary.write(sum);
 
     auto status = value.load();
-    REQUIRE(status == status::Success());
+    REQUIRE(status == status::binary::Success());
     REQUIRE(value.get() == 0xdeadbeef);
 
     driver.deinit();  
@@ -97,7 +97,7 @@ TEST_CASE("value safe load invalid crc primary")
     secondary.write(sum);
 
     auto status = value.load();
-    REQUIRE(status == status::Success());
+    REQUIRE(status == status::warning::possible::Data_loss());
     REQUIRE(value.get() == 0xdeadbeef);
 
     driver.deinit();  
@@ -122,7 +122,7 @@ TEST_CASE("value safe load invalid crc no secondary")
     primary.write(val);
 
     auto status = value.load();
-    REQUIRE(status != status::Success());
+    REQUIRE(status != status::binary::Success());
 
     driver.deinit();  
 }
@@ -154,7 +154,7 @@ TEST_CASE("value safe load invalid crc primary recover")
     secondary.write(sum);
 
     auto status = value.load();
-    REQUIRE(status == status::Success());
+    REQUIRE(status == status::warning::possible::Data_loss());
     REQUIRE(value.get() == 0xdeadbeef);
 
     driver.deinit();  
@@ -182,7 +182,7 @@ TEST_CASE("value safe load invalid crc primary recover no secondary")
     primary.write(val);
 
     auto status = value.load();
-    REQUIRE(status == status::Success());
+    REQUIRE(status == status::warning::possible::Data_loss());
     REQUIRE(value.get() == 0xdeadbeef);
 
     driver.deinit();  
@@ -214,7 +214,7 @@ TEST_CASE("value safe load invalid crc primary recover 1 secondary")
     secondary.write(sum);
 
     auto status = value.load();
-    REQUIRE(status == status::Success());
+    REQUIRE(status == status::warning::possible::Data_loss());
     REQUIRE(value.get() == 0xdeadbeef);
 
     driver.deinit();  

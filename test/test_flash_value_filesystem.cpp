@@ -112,3 +112,33 @@ TEST_CASE("value filesystem write read")
 
     driver.deinit();
 }
+
+TEST_CASE("value filesystem recover")
+{
+    Flash_driver_file driver;
+    Flash_sector sector(0, &driver);
+    Flash_value_filesystem<int, crc<32>, 16> value;
+
+    driver.init();
+
+    value.set(1).store(sector.at(0));
+    value.set(2).store(sector.at(0));
+
+    REQUIRE(value.usage() == 2);
+
+    unsigned char trash = 0x12;
+
+    sector.at(14).write(trash);
+
+    auto status = value.load(sector.at(0));
+    REQUIRE(status == status::error::frame::Crc_mismatch());
+
+    REQUIRE(value.get() == 2);
+
+    value.recover(sector.at(0));
+
+    REQUIRE(value.get() == 1);
+    REQUIRE(value.usage() == 3);
+
+    driver.deinit(); 
+}
