@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/../result/include",
-                "${workspaceFolder}/../crc/include"
+                "${workspaceFolder}/../crc/include",
+                "${workspaceFolder}/../family_c5/include"
             ],
             "intelliSenseMode": "gcc-x64",
             "compilerPath": "/usr/bin/gcc",

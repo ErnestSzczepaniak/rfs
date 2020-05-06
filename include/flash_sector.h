@@ -38,6 +38,7 @@ public:
 
     template<typename T> Result<T> read();
     template<typename T> Status write(T & value);
+    template<typename T> Status write_partial(T & value, int offset, int size);
 
 private:
     int _at;
@@ -72,5 +73,17 @@ Status Flash_sector::write(T & value)
     return true;
 }
 
+template<typename T>
+Status Flash_sector::write_partial(T & value, int offset, int size)
+{
+    if (_at + sizeof(T) > Flash_driver_generic::size_sector()) return status::error::argument::Size_mismatch();
+    if (offset + size > sizeof(T)) return status::error::argument::Out_of_range();
+    if (_driver == nullptr) return status::error::driver::Not_present();    
+    if (_driver->write(_number * Flash_driver_generic::size_sector() + _at + offset, size, (unsigned char *) &value + offset) == false) return status::error::driver::Write();
+ 
+    _at += sizeof(T);
+
+    return true;
+}
 
 #endif /* define: flash_Flash_sector_h */

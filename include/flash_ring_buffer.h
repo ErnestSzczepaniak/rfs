@@ -11,13 +11,6 @@
 
 #include "flash_value_safe.h"
 
-template<int sector, int item, int bytes = 1>
-constexpr int _bits_calculate()
-{
-    if constexpr (sector - bytes - bytes * 8 * item < 0) return bytes - 1;   
-    else return _bits_calculate<sector, item, bytes + 1>();
-}
-
 template<typename T, CRC<T> crc> 
 class Flash_ring_buffer
 {
@@ -26,10 +19,10 @@ class Flash_ring_buffer
     static constexpr int number_items_buffer = size_buffer / size_item;
     static constexpr int number_items_sector = Flash_driver_generic::size_sector() / size_item;
 
-    static constexpr int bytes = _bits_calculate<Flash_driver_generic::size_sector() / 2, size_item>();
+    static constexpr int _bits = Flash_driver_generic::number_bits();
 
     using Buffer = Flash_value_crc<T, crc>;
-    using Value = Flash_value_safe<int, crc, bytes * 8>;
+    using Value = Flash_value_safe<int, crc, _bits>;
 
     struct Info {int address; int offset; Flash_sector & sector;};
 

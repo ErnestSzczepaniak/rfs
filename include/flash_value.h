@@ -20,6 +20,7 @@ public:
 
     Status load(Flash_sector & sector);
     Status store(Flash_sector & sector);
+    Status store_partial(Flash_sector & sector, int offset, int size);
 
 private:
     T _value;
@@ -54,6 +55,14 @@ template<typename T>
 Status Flash_value<T>::store(Flash_sector & sector)
 {
     if (auto status_write = sector.write(_value); status_write == false) return status_write;
+
+    return true;
+}
+
+template<typename T> 
+Status Flash_value<T>::store_partial(Flash_sector & sector, int offset, int size)
+{
+    if (auto status_write = sector.write_partial(_value, offset, size); status_write == false) return status_write;
 
     return true;
 }

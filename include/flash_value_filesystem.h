@@ -55,13 +55,15 @@ Flash_value_filesystem<T, crc, bits> & Flash_value_filesystem<T, crc, bits>::set
 template<typename T, CRC<T> crc, int bits>
 Status Flash_value_filesystem<T, crc, bits>::load(Flash_sector & sector)
 {
+    auto base_address = sector.at();
+
     if (auto result_bitmap = _bitmap.load(sector); result_bitmap == false) return result_bitmap;
     
     if (_bitmap.get().is_full(true)) return true;
 
     auto offset = sizeof(Bitmap) + (usage() - 1) * sizeof(Value);
 
-    if (auto result_value = _value.load(sector.at(offset)); result_value == false) return result_value;
+    if (auto result_value = _value.load(sector.at(base_address + offset)); result_value == false) return result_value;
 
     return true;
 }
@@ -120,7 +122,12 @@ Result<int> Flash_value_filesystem<T, crc, bits>::_allocate(Flash_sector & secto
     auto index = _bitmap.get().count(false);
     _bitmap.get().set(index, false);
 
-    if (auto status = _bitmap.store(sector); status == false) return status;
+    //if (auto status = _bitmap.store(sector); status == false) return status;
+     // !: nie trzeba zapisywac calej bitmapy jedynie bajt ktory jest alokowany
+
+    //  // *: experimental
+    auto byte = index / 8;
+    if (auto status = _bitmap.store_partial(sector, byte, 1); status == false) return status;
 
     result.value = index;
 

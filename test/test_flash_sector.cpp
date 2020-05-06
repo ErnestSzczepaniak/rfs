@@ -154,3 +154,21 @@ TEST_CASE("sector write read")
     
     driver.deinit();
 }
+
+TEST_CASE("sector write partial")
+{
+    Flash_driver_file driver;
+    Flash_sector sector(0, &driver);
+
+    driver.init();
+
+    int tx = 0xdeadbeef;
+
+    sector.at(0).write_partial(tx, 1, 3);
+
+    auto result = sector.at(0).read<int>();
+
+    REQUIRE(result.value == 0xdeadbeff);
+
+    driver.deinit();  
+}
