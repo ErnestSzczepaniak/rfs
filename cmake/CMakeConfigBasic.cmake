@@ -19,14 +19,14 @@ set(name_library                rfs)
 set(name_executable             executable.elf)
 
 set(dependency_internal_common  result crc)
-set(dependency_internal_target  family_c5)
+set(dependency_internal_target  )
 set(dependency_internal_host    )
 
 set(dependency_external_common  )
 set(dependency_external_target  )
 set(dependency_external_host    )
 
-set(dependency_scope            PRIVATE)
+set(dependency_scope            PUBLIC)
 
 # ---------------------------------------------| target |--------------------------------------------- #
 
