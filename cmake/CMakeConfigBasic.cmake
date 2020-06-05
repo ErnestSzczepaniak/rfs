@@ -1,6 +1,6 @@
 # ---------------------------------------------| config |--------------------------------------------- #
 
-set(platform                    target)
+set(platform                    host)
 
 set(type                        debug)
 

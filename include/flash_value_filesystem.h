@@ -12,7 +12,7 @@
 #include "flash_value_crc.h"
 #include "flash_bitmap.h"
 
-template<typename T, CRC<T> crc, int bits = 8>
+template<typename T,CRC crc, int bits = 8>
 class Flash_value_filesystem
 {
     using Value = Flash_value_crc<T, crc>;
@@ -38,13 +38,13 @@ private:
 
 }; /* class: Flash_value_filesystem */
 
-template<typename T, CRC<T> crc, int bits>
+template<typename T,CRC crc, int bits>
 T & Flash_value_filesystem<T, crc, bits>::get()
 {
     return _value.get();
 }
 
-template<typename T, CRC<T> crc, int bits>
+template<typename T,CRC crc, int bits>
 Flash_value_filesystem<T, crc, bits> & Flash_value_filesystem<T, crc, bits>::set(T value)
 {
     _value.set(value);
@@ -52,7 +52,7 @@ Flash_value_filesystem<T, crc, bits> & Flash_value_filesystem<T, crc, bits>::set
     return *this;
 }
 
-template<typename T, CRC<T> crc, int bits>
+template<typename T,CRC crc, int bits>
 Status Flash_value_filesystem<T, crc, bits>::load(Flash_sector & sector)
 {
     auto base_address = sector.at();
@@ -68,7 +68,7 @@ Status Flash_value_filesystem<T, crc, bits>::load(Flash_sector & sector)
     return true;
 }
 
-template<typename T, CRC<T> crc, int bits>
+template<typename T,CRC crc, int bits>
 Status Flash_value_filesystem<T, crc, bits>::store(Flash_sector & sector)
 {
     auto base_address = sector.at();
@@ -88,7 +88,7 @@ Status Flash_value_filesystem<T, crc, bits>::store(Flash_sector & sector)
     return _value.store(sector.at(base_address + offset));
 }
 
-template<typename T, CRC<T> crc, int bits>
+template<typename T,CRC crc, int bits>
 Status Flash_value_filesystem<T, crc, bits>::recover(Flash_sector & sector)
 {
     auto base_address = sector.at();
@@ -106,7 +106,7 @@ Status Flash_value_filesystem<T, crc, bits>::recover(Flash_sector & sector)
     else return false;
 }
 
-template<typename T, CRC<T> crc, int bits>
+template<typename T,CRC crc, int bits>
 int Flash_value_filesystem<T, crc, bits>::usage()
 {
     return _bitmap.get().count(false);
@@ -114,7 +114,7 @@ int Flash_value_filesystem<T, crc, bits>::usage()
 
 /* ---------------------------------------------| info |--------------------------------------------- */
 
-template<typename T, CRC<T> crc, int bits>
+template<typename T,CRC crc, int bits>
 Result<int> Flash_value_filesystem<T, crc, bits>::_allocate(Flash_sector & sector)
 {
     Result<int> result;

@@ -17,10 +17,10 @@ TEST_CASE("value crc store driver read")
     unsigned int crc;
 
     driver.read(0, sizeof(int), (unsigned char *) &rx);
-    driver.read(sizeof(int), sizeof(unsigned int), (unsigned char *) &crc);
+    driver.read(sizeof(unsigned int), sizeof(unsigned int), (unsigned char *) &crc);
 
     REQUIRE(rx == 0xdeadbeef);
-    REQUIRE(crc == 0x2ae4bf98);
+    REQUIRE(crc == 0x2AE4BF98);
 
     driver.deinit();
 }
@@ -34,7 +34,7 @@ TEST_CASE("value crc load driver write")
     driver.init();
 
     int tx = 0xdeadbeef;
-    unsigned int crc = 0x2ae4bf98;
+    unsigned int crc = 0x2AE4BF98;
 
     driver.write(0, sizeof(int), (unsigned char *) &tx);
     driver.write(sizeof(int), sizeof(unsigned int), (unsigned char *) &crc);

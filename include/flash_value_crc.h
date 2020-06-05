@@ -11,10 +11,9 @@
 
 #include "flash_value.h"
 
-template<typename T>
-using CRC = unsigned int (*)(T &);
+using CRC = unsigned int (*)(void *, int);
 
-template<typename T, CRC<T> crc>
+template<typename T, CRC crc>
 class Flash_value_crc
 {
 public:
@@ -26,17 +25,17 @@ public:
 
 private:
     Flash_value<T> _value;
-    Flash_value<unsigned int> _crc;    
+    Flash_value<unsigned int> _crc;  
 
 }; /* class: Flash_value_crc */
 
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 T & Flash_value_crc<T, crc>::get()
 {
     return _value.get();
 }
 
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 Flash_value_crc<T, crc> & Flash_value_crc<T, crc>::set(T value)
 {
     _value.set(value);
@@ -44,20 +43,20 @@ Flash_value_crc<T, crc> & Flash_value_crc<T, crc>::set(T value)
     return *this;
 }
 
-template<typename T, CRC<T> crc>  
+template<typename T, CRC crc>  
 Status Flash_value_crc<T, crc>::load(Flash_sector & sector)
 {
     if (auto result_value = _value.load(sector); result_value == false) return result_value;
     if (auto result_crc = _crc.load(sector); result_crc == false) return result_crc;
-    if (_crc.get() != crc(_value.get())) return status::error::frame::Crc_mismatch();
+    if (_crc.get() != crc(&_value.get(), sizeof(T))) return status::error::frame::Crc_mismatch();
 
     return true;
 }
 
-template<typename T, CRC<T> crc>  
+template<typename T, CRC crc>  
 Status Flash_value_crc<T, crc>::store(Flash_sector & sector)
 {
-    _crc.set(crc(_value.get()));
+    _crc.set(crc(&_value.get(), sizeof(T)));
 
     if (auto result_value = _value.store(sector); result_value == false) return result_value;
     if (auto result_crc = _crc.store(sector); result_crc == false) return result_crc;

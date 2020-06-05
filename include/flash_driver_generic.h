@@ -17,9 +17,11 @@ class Flash_driver_generic
      * @details	
     **/
 
+   // for test use 512 sector size, 8 bits
+   // for target use 256 * 1024 secotr size, 8192 bits
     static constexpr auto _size_sector = 256 * 1024;
     static constexpr auto _number_sector = 5;
-    static constexpr auto _number_bits = 1024 * 8;
+    static constexpr auto _number_bits = 8192;
     static constexpr auto _size_flash = _size_sector * _number_sector;
 
 public:

@@ -39,7 +39,7 @@ int main()
     // // s.at(1).write(tx);
     // // auto result = s.at(1).read<Data>();
     
-    // Flash_ring_buffer<int, crc<32>> buffer(&driver);
+    Flash_ring_buffer<int, crc_template<8>> buffer(&driver);
     // // // int tx[128], Data[128];
 
 

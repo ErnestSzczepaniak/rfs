@@ -11,7 +11,7 @@
 
 #include "flash_value_safe.h"
 
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 class Flash_ring_buffer
 {
     static constexpr int size_item = sizeof(Flash_value_crc<T, crc>);
@@ -26,7 +26,7 @@ class Flash_ring_buffer
 
     struct Info {int address; int offset; Flash_sector & sector;};
 
-    static_assert(Flash_driver_generic::size_sector() % sizeof(T) == 0, "Item size must fit into sector ...");
+    static_assert(Flash_driver_generic::size_sector() % sizeof(Buffer) == 0, "Item size must fit into sector ...");
 
 public:
     Flash_ring_buffer(Flash_driver_generic * driver);
@@ -59,7 +59,7 @@ private:
 
 }; /* class: Flash_ring_buffer */
 
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 Flash_ring_buffer<T, crc>::Flash_ring_buffer(Flash_driver_generic * driver)
 :
 _head(0, _sector[0], _sector[1]),
@@ -72,13 +72,13 @@ _size(Flash_driver_generic::size_sector() / 2, _sector[0], _sector[1])
     }   
 }
 
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 Flash_ring_buffer<T, crc>::~Flash_ring_buffer()
 {
 
 }
 
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 Status Flash_ring_buffer<T, crc>::init()
 {
     if (auto status_head = _head.load(); status_head == false) return status_head;
@@ -87,7 +87,7 @@ Status Flash_ring_buffer<T, crc>::init()
     return true;
 }
 
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 Status Flash_ring_buffer<T, crc>::reset()
 {
     for (int i = 0; i < Flash_driver_generic::number_sector(); i++)
@@ -102,25 +102,25 @@ Status Flash_ring_buffer<T, crc>::reset()
     return true;
 }
 
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 bool Flash_ring_buffer<T, crc>::is_full()
 {
     return (_size.get() == number_items_buffer);
 }
 
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 bool Flash_ring_buffer<T, crc>::is_empty()
 {
     return (_size.get() == 0);
 }
 
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 int Flash_ring_buffer<T, crc>::size_actual()
 {
     return _size.get();
 }
 
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 int Flash_ring_buffer<T, crc>::size_max()
 {
     return number_items_buffer;
@@ -128,7 +128,7 @@ int Flash_ring_buffer<T, crc>::size_max()
 
 /* ---------------------------------------------| main story |--------------------------------------------- */
 
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 Status Flash_ring_buffer<T, crc>::push(T value)
 {
     auto [head_address, head_offset, head_sector] = _head_info();
@@ -158,7 +158,7 @@ Status Flash_ring_buffer<T, crc>::push(T value)
     return true;
 }
 
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 Result<bool> Flash_ring_buffer<T, crc>::pop()
 {
     Result<bool> result;
@@ -172,7 +172,7 @@ Result<bool> Flash_ring_buffer<T, crc>::pop()
     return result;
 }
 
-template<typename T, CRC<T> crc>
+template<typename T, CRC crc>
 Result<T> Flash_ring_buffer<T, crc>::at(int index)
 {
     Result<T> result;
@@ -192,7 +192,7 @@ Result<T> Flash_ring_buffer<T, crc>::at(int index)
 
 /* ---------------------------------------------| info |--------------------------------------------- */
 
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 typename Flash_ring_buffer<T, crc>::Info Flash_ring_buffer<T, crc>::_head_info()
 {
     auto address = _head.get();
@@ -201,7 +201,7 @@ typename Flash_ring_buffer<T, crc>::Info Flash_ring_buffer<T, crc>::_head_info()
 
     return {(int) address, (int) offset,sector};
 }
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 typename Flash_ring_buffer<T, crc>::Info Flash_ring_buffer<T, crc>::_tail_info_at(int index)
 {
     auto size_desired = _size.get() - index;
@@ -212,7 +212,7 @@ typename Flash_ring_buffer<T, crc>::Info Flash_ring_buffer<T, crc>::_tail_info_a
 
     return {(int) address, (int) offset, sector};
 }
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 Status Flash_ring_buffer<T, crc>::_head_update()
 {
     _head.set((_head.get() + size_item));
@@ -221,7 +221,7 @@ Status Flash_ring_buffer<T, crc>::_head_update()
 
     return _head.store();
 }
-template<typename T, CRC<T> crc> 
+template<typename T, CRC crc> 
 Status Flash_ring_buffer<T, crc>::_size_update(int value)
 {
     if (((_size.get() + value) >= 0) && ((_size.get() + value) <= number_items_buffer)) _size.set(_size.get() + value);

@@ -11,7 +11,7 @@
 
 #include "flash_value_filesystem.h"
 
-template<typename T, CRC<T> crc, int bits>
+template<typename T, CRC crc, int bits>
 class Flash_value_safe
 {
     using Value = Flash_value_filesystem<T, crc, bits>;
@@ -43,7 +43,7 @@ private:
 
 }; /* class: Flash_value_safe */
 
-template<typename T, CRC<T> crc, int bits> 
+template<typename T, CRC crc, int bits> 
 Flash_value_safe<T, crc, bits>::Flash_value_safe(int address, Flash_sector & primary, Flash_sector & secondary)
 :
 _address(address),
@@ -53,19 +53,19 @@ _sector_secondary(secondary)
 
 }
 
-template<typename T, CRC<T> crc, int bits> 
+template<typename T, CRC crc, int bits> 
 Flash_value_safe<T, crc, bits>::~Flash_value_safe()
 {
 
 }
 
-template<typename T, CRC<T> crc, int bits> 
+template<typename T, CRC crc, int bits> 
 T & Flash_value_safe<T, crc, bits>::get()
 {   
     return _value_primary.get();
 }
 
-template<typename T, CRC<T> crc, int bits> 
+template<typename T, CRC crc, int bits> 
 Flash_value_safe<T, crc, bits> & Flash_value_safe<T, crc, bits>::set(T value)
 {
     _value_primary.set(value);
@@ -74,7 +74,7 @@ Flash_value_safe<T, crc, bits> & Flash_value_safe<T, crc, bits>::set(T value)
     return *this;
 }
 
-template<typename T, CRC<T> crc, int bits> 
+template<typename T, CRC crc, int bits> 
 Status Flash_value_safe<T, crc, bits>::load()
 {
     auto status_primary = _value_primary.load(_sector_primary.at(_address));
@@ -112,7 +112,7 @@ Status Flash_value_safe<T, crc, bits>::load()
     return false;
 }
 
-template<typename T, CRC<T> crc, int bits> 
+template<typename T, CRC crc, int bits> 
 Status Flash_value_safe<T, crc, bits>::store()
 {
     if (auto status_primary = _value_primary.store(_sector_primary.at(_address)); status_primary == false) return status_primary;
@@ -123,7 +123,7 @@ Status Flash_value_safe<T, crc, bits>::store()
 
 /* ---------------------------------------------| info |--------------------------------------------- */
 
-template<typename T, CRC<T> crc, int bits> 
+template<typename T, CRC crc, int bits> 
 Status Flash_value_safe<T, crc, bits>::_copy_primary()
 {
     _value_secondary.set(_value_primary.get());
@@ -133,7 +133,7 @@ Status Flash_value_safe<T, crc, bits>::_copy_primary()
     return status::warning::possible::Data_loss();
 }
 
-template<typename T, CRC<T> crc, int bits> 
+template<typename T, CRC crc, int bits> 
 Status Flash_value_safe<T, crc, bits>::_copy_secondary()
 {
     _value_primary.set(_value_secondary.get());
@@ -143,7 +143,7 @@ Status Flash_value_safe<T, crc, bits>::_copy_secondary()
     return status::warning::possible::Data_loss();
 }
 
-template<typename T, CRC<T> crc, int bits> 
+template<typename T, CRC crc, int bits> 
 Status Flash_value_safe<T, crc, bits>::_recover_primary()
 {
     if (auto status_recover = _value_primary.recover(_sector_primary.at(_address)); status_recover == false) return status_recover;
@@ -155,7 +155,7 @@ Status Flash_value_safe<T, crc, bits>::_recover_primary()
     return status::warning::possible::Data_loss();
 }
 
-template<typename T, CRC<T> crc, int bits> 
+template<typename T, CRC crc, int bits> 
 Status Flash_value_safe<T, crc, bits>::_recover_secondary()
 {
     if (auto status_recover = _value_secondary.recover(_sector_secondary.at(_address)); status_recover == false) return status_recover;

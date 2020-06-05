@@ -112,3 +112,22 @@ TEST_CASE("buffer overflow")
     
     driver.deinit();   
 }
+
+struct Type
+{
+    int k;
+    const char * w;
+}; /* structure: Type */
+
+
+TEST_CASE("buffer other typ")
+{
+    Flash_driver_file driver;
+    Flash_ring_buffer<Type, crc<32>> buffer(&driver);
+
+    driver.init();
+
+    buffer.reset();
+
+    driver.deinit();
+}
