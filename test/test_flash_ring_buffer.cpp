@@ -6,9 +6,8 @@
 TEST_CASE("buffer reset")
 {
     Flash_driver_file driver;
-    Flash_ring_buffer<int, crc<32>> buffer(&driver);
-
-    driver.init();
+    Flash_ring_buffer<int, crc<32>> buffer;
+    buffer.init(&driver);
 
     buffer.reset();
 
@@ -24,9 +23,8 @@ TEST_CASE("buffer reset")
 TEST_CASE("buffer push")
 {
     Flash_driver_file driver;
-    Flash_ring_buffer<int, crc<32>> buffer(&driver);
-
-    driver.init();
+    Flash_ring_buffer<int, crc<32>> buffer;
+    buffer.init(&driver);
 
     buffer.reset();
 
@@ -43,9 +41,8 @@ TEST_CASE("buffer push")
 TEST_CASE("buffer pop")
 {
     Flash_driver_file driver;
-    Flash_ring_buffer<int, crc<32>> buffer(&driver);
-
-    driver.init();
+    Flash_ring_buffer<int, crc<32>> buffer;
+    buffer.init(&driver);
 
     buffer.reset();
 
@@ -67,9 +64,8 @@ TEST_CASE("buffer pop")
 TEST_CASE("buffer at")
 {
     Flash_driver_file driver;
-    Flash_ring_buffer<int, crc<32>> buffer(&driver);
-
-    driver.init();
+    Flash_ring_buffer<int, crc<32>> buffer;
+    buffer.init(&driver);
 
     buffer.reset();
 
@@ -89,9 +85,8 @@ TEST_CASE("buffer at")
 TEST_CASE("buffer overflow")
 {
     Flash_driver_file driver;
-    Flash_ring_buffer<int, crc<32>> buffer(&driver);
-
-    driver.init();
+    Flash_ring_buffer<int, crc<32>> buffer;
+    buffer.init(&driver);
 
     buffer.reset();
 
@@ -123,9 +118,8 @@ struct Type
 TEST_CASE("buffer other typ")
 {
     Flash_driver_file driver;
-    Flash_ring_buffer<Type, crc<32>> buffer(&driver);
-
-    driver.init();
+    Flash_ring_buffer<int, crc<32>> buffer;
+    buffer.init(&driver);
 
     buffer.reset();
 

@@ -29,10 +29,11 @@ class Flash_ring_buffer
     static_assert(Flash_driver_generic::size_sector() % sizeof(Buffer) == 0, "Item size must fit into sector ...");
 
 public:
-    Flash_ring_buffer(Flash_driver_generic * driver);
+    Flash_ring_buffer();
     ~Flash_ring_buffer();
 
-    Status init();
+    void init(Flash_driver_generic * driver);
+    Status restore();
     Status reset();
 
     bool is_full();
@@ -60,16 +61,12 @@ private:
 }; /* class: Flash_ring_buffer */
 
 template<typename T, CRC crc> 
-Flash_ring_buffer<T, crc>::Flash_ring_buffer(Flash_driver_generic * driver)
+Flash_ring_buffer<T, crc>::Flash_ring_buffer()
 :
 _head(0, _sector[0], _sector[1]),
 _size(Flash_driver_generic::size_sector() / 2, _sector[0], _sector[1])
 {
-    for (int i = 0; i < Flash_driver_generic::number_sector(); i++)
-    {
-        _sector[i].number(i);
-        _sector[i].driver(driver);
-    }   
+ 
 }
 
 template<typename T, CRC crc> 
@@ -78,8 +75,18 @@ Flash_ring_buffer<T, crc>::~Flash_ring_buffer()
 
 }
 
+template<typename T, CRC crc>
+void Flash_ring_buffer<T, crc>::init(Flash_driver_generic * driver)
+{
+    for (int i = 0; i < Flash_driver_generic::number_sector(); i++)
+    {
+        _sector[i].number(i);
+        _sector[i].driver(driver);
+    }  
+}
+
 template<typename T, CRC crc> 
-Status Flash_ring_buffer<T, crc>::init()
+Status Flash_ring_buffer<T, crc>::restore()
 {
     if (auto status_head = _head.load(); status_head == false) return status_head;
     if (auto status_size = _size.load(); status_size == false) return status_size;
